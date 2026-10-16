@@ -121,13 +121,49 @@
       }, 160);
     };
 
-    const initialize = () => {
-      document.querySelectorAll('[data-blog-translation-root]').forEach((root) => {
-        applyLanguage(root, getStoredLanguage(root) || getDefaultLanguage(root));
+    const listLanguageKey = 'jay-blog-list-language';
+    let listLanguage = 'en';
+    try {
+      const stored = localStorage.getItem(listLanguageKey);
+      if (stored === 'en' || stored === 'zh') listLanguage = stored;
+    } catch {}
+
+    const updateListButtons = () => {
+      const hasTranslations = [...document.querySelectorAll('[data-blog-list] .blog-row')]
+        .some((root) => getLanguages(root).length > 1);
+      document.querySelectorAll('[data-blog-translate-all]').forEach((button) => {
+        button.hidden = !hasTranslations;
+        const label = `Translate to ${languageLabels[listLanguage === 'en' ? 'zh' : 'en']}`;
+        button.setAttribute('aria-label', label);
+        button.querySelector('[data-blog-list-translate-label]').textContent = label;
       });
     };
 
+    const initialize = () => {
+      document.querySelectorAll('[data-blog-translation-root]').forEach((root) => {
+        const language = root.closest('[data-blog-list]')
+          ? listLanguage
+          : getStoredLanguage(root) || getDefaultLanguage(root);
+        applyLanguage(root, language);
+        if (root.closest('[data-blog-list]')) storeLanguage(root, getCurrentLanguage(root));
+      });
+      updateListButtons();
+    };
+
     document.addEventListener('click', (event) => {
+      const listButton = event.target.closest('[data-blog-translate-all]');
+      if (listButton) {
+        listLanguage = listLanguage === 'en' ? 'zh' : 'en';
+        try { localStorage.setItem(listLanguageKey, listLanguage); } catch {}
+        document.querySelectorAll('[data-blog-list] [data-blog-translation-root]').forEach((root) => {
+          if (!getLanguages(root).includes(listLanguage)) return;
+          storeLanguage(root, listLanguage);
+          applyLanguage(root, listLanguage);
+        });
+        updateListButtons();
+        return;
+      }
+
       const button = event.target.closest('[data-blog-translate-toggle]');
 
       if (!button) {

@@ -4,10 +4,9 @@ import BlogLogHeader from '../blog/BlogLogHeader.astro';
 interface Props {
   title?: string;
   subtitle?: string;
-  count?: number;
 }
 
-const { title = 'Blog', subtitle, count } = Astro.props as Props;
+const { title = 'Blog', subtitle } = Astro.props as Props;
 ---
 
-<BlogLogHeader title={title} description={subtitle} count={count} />
+<BlogLogHeader title={title} description={subtitle} />

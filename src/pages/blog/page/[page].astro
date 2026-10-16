@@ -10,23 +10,21 @@ const PAGE_SIZE = 6;
 export async function getStaticPaths() {
   const PAGE_SIZE = 6;
   const posts = await getBlogPostGroups();
-  const [, ...rest] = posts;
-  const totalPages = Math.max(1, Math.ceil(rest.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
   return Array.from({ length: totalPages - 1 }, (_, index) => ({
     params: { page: String(index + 2) },
   }));
 }
 
 const posts = await getBlogPostGroups();
-const [, ...rest] = posts;
 const { page } = Astro.params;
 const currentPage = Math.max(1, parseInt(page || '1', 10));
 const start = (currentPage - 1) * PAGE_SIZE;
-const pagePosts = rest.slice(start, start + PAGE_SIZE);
-const totalPages = Math.max(1, Math.ceil(rest.length / PAGE_SIZE));
+const pagePosts = posts.slice(start, start + PAGE_SIZE);
+const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
 ---
 
-<SiteShell title={`Blog - Page ${currentPage}`} description={`Blog page ${currentPage} by Jay Yu.`}>
+<SiteShell bodyClass="blog-list-page" title={`Blog - Page ${currentPage}`} description={`Blog page ${currentPage} by Jay Yu.`}>
   <Fragment slot="head">
     {currentPage > 1 && (
       <link rel="prev" href={currentPage === 2 ? '/blog/' : `/blog/page/${currentPage - 1}/`} />
@@ -39,7 +37,6 @@ const totalPages = Math.max(1, Math.ceil(rest.length / PAGE_SIZE));
   <BlogLogHeader
     title={`Blog / Page ${currentPage}`}
     description="More notes and essays."
-    count={pagePosts.length}
   />
   <BlogPostList posts={pagePosts} title="Posts" />
   <BlogPagination currentPage={currentPage} totalPages={totalPages} />

@@ -19,7 +19,7 @@ const posts = (await getBlogPostGroups()).filter((post) =>
 const meta = getTagMeta(tag);
 ---
 
-<SiteShell title={meta.title} description={meta.description}>
+<SiteShell bodyClass="blog-list-page" title={meta.title} description={meta.description}>
   <Fragment slot="head">
     <link rel="alternate" type="application/rss+xml" title={`Tag: ${tag} feed`} href={`/rss/tag/${tag}.xml`} />
   </Fragment>
@@ -28,7 +28,6 @@ const meta = getTagMeta(tag);
     title={meta.title}
     description={meta.description}
     label="Tag"
-    count={posts.length}
   />
   <BlogPostList posts={posts} title="Tagged posts" />
 </SiteShell>

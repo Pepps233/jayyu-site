@@ -1,7 +1,9 @@
 ---
-import PostCard from '../ui/card/PostCard.astro';
+import { Image } from 'astro:assets';
+import BlogPostRow from './BlogPostRow.astro';
 import BlogTranslationScript from './BlogTranslationScript.astro';
-import type { BlogPostGroup } from '../../lib/blog';
+import { getBlogLanguageMeta, getPostHref, type BlogPostGroup } from '../../lib/blog';
+import '../../styles/blog-list.css';
 
 interface Props {
   posts: BlogPostGroup[];
@@ -9,20 +11,57 @@ interface Props {
   label?: string;
 }
 
-const { posts = [], title = 'All posts', label } = Astro.props as Props;
+const { posts = [], title = 'All posts' } = Astro.props as Props;
+const illustratedPosts = posts.filter((post) => post.defaultPost.data.heroImage);
 ---
 
-<section class="blog-list-module">
-  <div class="module-header">
-    <div>
-      {label && <span class="module-label">{label}</span>}
-      <h2>{title}</h2>
-    </div>
+<section class="blog-index" aria-label={title} data-blog-list>
+  <div class="blog-index__rows">
+    <div class="blog-index__columns" aria-hidden="true"><span>Date</span><span>Title</span></div>
+    {posts.map((post) => <BlogPostRow postGroup={post} />)}
+    {posts.length === 0 && <p>No posts yet.</p>}
   </div>
-  <div class="blog-grid">
-    {posts.map((post) => (
-      <PostCard postGroup={post} />
-    ))}
-  </div>
+  {illustratedPosts.length > 0 && (
+    <aside class="blog-index__previews" aria-label="Article preview">
+      {illustratedPosts.map((post, index) => (
+        <a
+          class="blog-preview no-underline"
+          href={getPostHref(post)}
+          data-blog-preview={post.slug}
+          hidden={index !== 0}
+          data-blog-translation-root
+          data-blog-slug={post.slug}
+          data-default-language={post.defaultLanguage}
+          data-current-language={post.defaultLanguage}
+          data-languages={post.languages.join(',')}
+        >
+          <div class="blog-preview__image">
+            <Image src={post.defaultPost.data.heroImage!} width={480} alt="" />
+          </div>
+          <span class="blog-translation-stack">
+            {getBlogLanguageMeta(post).map((item) => (
+              <span class:list={['blog-lang-fragment', { 'is-active': item.language === post.defaultLanguage }]} data-blog-lang={item.language} aria-hidden={item.language === post.defaultLanguage ? 'false' : 'true'}>{item.title}</span>
+            ))}
+          </span>
+        </a>
+      ))}
+    </aside>
+  )}
   <BlogTranslationScript />
 </section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-blog-list]').forEach((list) => {
+    const showPreview = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const row = target.closest<HTMLElement>('.blog-row');
+      if (!row) return;
+      list.querySelectorAll<HTMLElement>('[data-blog-preview]').forEach((preview) => {
+        preview.hidden = preview.dataset.blogPreview !== row.dataset.blogSlug;
+      });
+    };
+    list.addEventListener('pointerover', showPreview);
+    list.addEventListener('focusin', showPreview);
+  });
+</script>

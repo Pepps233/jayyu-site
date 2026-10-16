@@ -25,7 +25,7 @@ const posts = (await getBlogPostGroups()).filter(
 const meta = getCategoryMeta(category);
 ---
 
-<SiteShell title={`${meta.title} - Category`} description={meta.description}>
+<SiteShell bodyClass="blog-list-page" title={`${meta.title} - Category`} description={meta.description}>
   <Fragment slot="head">
     <link rel="alternate" type="application/rss+xml" title={`Category: ${category} feed`} href={`/rss/category/${category}.xml`} />
   </Fragment>
@@ -34,7 +34,6 @@ const meta = getCategoryMeta(category);
     title={meta.title}
     description={meta.description}
     label="Category"
-    count={posts.length}
   />
   <BlogPostList posts={posts} title="Category posts" />
 </SiteShell>

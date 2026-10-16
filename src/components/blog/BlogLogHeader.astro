@@ -3,10 +3,9 @@ interface Props {
   title: string;
   description?: string;
   label?: string;
-  count?: number;
 }
 
-const { title, description, label, count } = Astro.props as Props;
+const { title, description, label } = Astro.props as Props;
 ---
 
 <section class="blog-log-header">
@@ -17,7 +16,9 @@ const { title, description, label, count } = Astro.props as Props;
       {description && <p>{description}</p>}
     </div>
     <div class="blog-log-header__actions">
-      {typeof count === 'number' && <span class="status-chip">{count} posts</span>}
+      <button type="button" class="blog-list-translate" data-blog-translate-all hidden>
+        <span data-blog-list-translate-label>Translate to 中文</span>
+      </button>
     </div>
   </div>
 </section>

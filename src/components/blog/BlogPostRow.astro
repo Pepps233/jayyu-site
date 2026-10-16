@@ -1,0 +1,46 @@
+---
+import FormattedDate from '../FormattedDate.astro';
+import { getBlogLanguageMeta, getPostHref, type BlogPostGroup } from '../../lib/blog';
+
+interface Props {
+  postGroup: BlogPostGroup;
+}
+
+const { postGroup } = Astro.props as Props;
+const post = postGroup.defaultPost;
+const languageMeta = getBlogLanguageMeta(postGroup);
+const titleAttributes = Object.fromEntries(
+  languageMeta.map((item) => [`data-title-${item.language}`, item.title])
+);
+---
+
+<article
+  class="blog-row"
+  data-blog-translation-root
+  data-blog-card
+  data-blog-slug={postGroup.slug}
+  data-default-language={postGroup.defaultLanguage}
+  data-current-language={postGroup.defaultLanguage}
+  data-languages={postGroup.languages.join(',')}
+>
+  <a href={getPostHref(postGroup)} class="blog-row__link no-underline" data-blog-read-link aria-label={`Read ${post.data.title}`} {...titleAttributes}>
+    <span class="blog-row__date"><FormattedDate date={post.data.pubDate} /></span>
+    <div class="blog-row__copy">
+      <h3 class="blog-translation-stack" data-blog-copy="title">
+        {languageMeta.map((item) => (
+          <span class:list={['blog-lang-fragment', { 'is-active': item.language === postGroup.defaultLanguage }]} data-blog-lang={item.language} aria-hidden={item.language === postGroup.defaultLanguage ? 'false' : 'true'}>
+            {item.title}
+          </span>
+        ))}
+      </h3>
+      <p class="blog-translation-stack" data-blog-copy="description">
+        {languageMeta.map((item) => (
+          <span class:list={['blog-lang-fragment', { 'is-active': item.language === postGroup.defaultLanguage }]} data-blog-lang={item.language} aria-hidden={item.language === postGroup.defaultLanguage ? 'false' : 'true'}>
+            {item.description}
+          </span>
+        ))}
+      </p>
+    </div>
+    <span class="blog-row__arrow" aria-hidden="true">→</span>
+  </a>
+</article>

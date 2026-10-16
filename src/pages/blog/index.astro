@@ -3,21 +3,15 @@ import SiteShell from '../../components/SiteShell.astro';
 import BlogLogHeader from '../../components/blog/BlogLogHeader.astro';
 import BlogPostList from '../../components/blog/BlogPostList.astro';
 import BlogPagination from '../../components/ui/nav/BlogPagination.astro';
-import FeaturedPost from '../../components/ui/card/FeaturedPost.astro';
 import { getBlogPostGroups } from '../../lib/blog';
-import { calculateReadingTimeFromMarkdown } from '../../lib/reading';
 
 const PAGE_SIZE = 6;
 const posts = await getBlogPostGroups();
-const [featured, ...rest] = posts;
-const firstPagePosts = rest.slice(0, PAGE_SIZE);
-const totalPages = Math.max(1, Math.ceil(rest.length / PAGE_SIZE));
-const featuredReading = featured
-  ? calculateReadingTimeFromMarkdown((featured.defaultPost as any).body || featured.defaultPost.data.description || '')
-  : 0;
+const firstPagePosts = posts.slice(0, PAGE_SIZE);
+const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
 ---
 
-<SiteShell title="Blog" description="Notes and essays by Jay Yu.">
+<SiteShell bodyClass="blog-list-page" title="Blog" description="Notes and essays by Jay Yu.">
   <Fragment slot="head">
     {totalPages > 1 && <link rel="next" href="/blog/page/2/" />}
   </Fragment>
@@ -25,20 +19,7 @@ const featuredReading = featured
   <BlogLogHeader
     title="Blog"
     description="Notes, essays, and build records."
-    count={posts.length}
   />
-
-  {featured && (
-    <section class="dev-section" aria-labelledby="featured-post-title">
-      <div class="module-header">
-        <div>
-          <span class="module-label">Featured</span>
-          <h2 id="featured-post-title">Pinned post</h2>
-        </div>
-      </div>
-      <FeaturedPost postGroup={featured} readingTimeMin={featuredReading} />
-    </section>
-  )}
 
   <BlogPostList posts={firstPagePosts} title="Recent posts" />
   <BlogPagination currentPage={1} totalPages={totalPages} />

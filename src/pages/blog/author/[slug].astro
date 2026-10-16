@@ -20,12 +20,11 @@ const posts = (await getBlogPostGroups()).filter(
 const authorName = posts[0]?.defaultPost.data.author || 'Jay Yu';
 ---
 
-<SiteShell title={`Articles by ${authorName}`} description={`Posts written by ${authorName}.`}>
+<SiteShell bodyClass="blog-list-page" title={`Articles by ${authorName}`} description={`Posts written by ${authorName}.`}>
   <BlogLogHeader
     title={`Author / ${authorName}`}
     description="A filtered author view."
     label="Author"
-    count={posts.length}
   />
   <BlogPostList posts={posts} title="Posts" />
 </SiteShell>

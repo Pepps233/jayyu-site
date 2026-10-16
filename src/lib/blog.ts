@@ -109,9 +109,5 @@ export async function getBlogPostGroups(): Promise<BlogPostGroup[]> {
       };
     })
     .filter((group): group is BlogPostGroup => Boolean(group.defaultPost))
-    .sort((a, b) => {
-      const pinOrder = Number(b.defaultPost.data.pinned) - Number(a.defaultPost.data.pinned);
-
-      return pinOrder || +b.defaultPost.data.pubDate - +a.defaultPost.data.pubDate;
-    });
+    .sort((a, b) => +b.defaultPost.data.pubDate - +a.defaultPost.data.pubDate);
 }
