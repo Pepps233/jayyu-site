@@ -13,6 +13,12 @@ export default defineConfig({
     enabled: false,
   },
   integrations: [mdx(), sitemap()],
+  markdown: {
+    remarkRehype: {
+      // Request text presentation so footnote arrows do not render as emoji.
+      footnoteBackContent: '\u21A9\uFE0E',
+    },
+  },
 
   vite: {
     plugins: [tailwindcss()],
