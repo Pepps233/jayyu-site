@@ -1,14 +1,12 @@
 ---
 import { Image } from 'astro:assets';
 import SiteShell from '../components/SiteShell.astro';
-import PostMeta from '../components/ui/meta/PostMeta.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import ShareButtons from '../components/ui/share/ShareButtons.astro';
 import '../styles/blog-article.css';
 import PostNav from '../components/ui/nav/PostNav.astro';
 import { slugifyTag } from '../lib/slug';
 import BlogTranslationScript from '../components/blog/BlogTranslationScript.astro';
-import type { BlogLanguageMeta, BlogPostGroup } from '../lib/blog';
+import { getBlogIndexHref, getBlogSection, type BlogLanguageMeta, type BlogPostGroup } from '../lib/blog';
 
 interface Props {
   postGroup: BlogPostGroup;
@@ -16,7 +14,6 @@ interface Props {
   showHeader?: boolean;
   prevPost?: { slug: string; title: string } | null;
   nextPost?: { slug: string; title: string } | null;
-  readingTimeMin?: number;
 }
 
 const {
@@ -25,7 +22,6 @@ const {
   showHeader = true,
   prevPost = null,
   nextPost = null,
-  readingTimeMin = 1,
 } = Astro.props as Props;
 
 const defaultPost = postGroup.defaultPost;
@@ -93,7 +89,7 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
     data-current-language={postGroup.defaultLanguage}
     data-languages={languages}
   >
-    <a class="article-back no-underline" href="/blog/">
+    <a class="article-back no-underline" href={getBlogIndexHref(getBlogSection(postGroup))}>
       <span aria-hidden="true">←</span> Back
     </a>
     {showHeader && (
@@ -133,13 +129,16 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
         </aside>
       )}
     </div>
-    <footer class="article-end article-column">
-      <div class="article-end__details">
-        <PostMeta readingTimeMin={readingTimeMin} authorName={authorName} />
-        <ShareButtons title={title} url={new URL(Astro.url.pathname, Astro.site).toString()} />
+    {Astro.slots.has('citations') && (
+      <aside class="article-citations article-column" aria-label="References">
+        <slot name="citations" />
+      </aside>
+    )}
+    {(prevPost || nextPost) && (
+      <div class="article-navigation article-column">
+        <PostNav prev={prevPost} next={nextPost} />
       </div>
-      <PostNav prev={prevPost} next={nextPost} />
-    </footer>
+    )}
   </article>
   <BlogTranslationScript />
 </SiteShell>

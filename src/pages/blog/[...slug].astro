@@ -1,8 +1,7 @@
 ---
 import { render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
-import { getBlogPostGroups, getBlogLanguageMeta, type BlogPostGroup } from '../../lib/blog';
-import { calculateReadingTimeFromMarkdown } from '../../lib/reading';
+import { getBlogPostGroups, getBlogLanguageMeta, getBlogSection, type BlogPostGroup } from '../../lib/blog';
 
 export async function getStaticPaths() {
 	const posts = await getBlogPostGroups();
@@ -14,7 +13,7 @@ export async function getStaticPaths() {
 type Props = BlogPostGroup;
 
 const postGroup = Astro.props as Props;
-const posts = await getBlogPostGroups();
+const posts = (await getBlogPostGroups()).filter((post) => getBlogSection(post) === getBlogSection(postGroup));
 const index = posts.findIndex((post) => post.slug === postGroup.slug);
 const prev = index < posts.length - 1
   ? { slug: posts[index + 1].slug, title: posts[index + 1].defaultPost.data.title }
@@ -40,9 +39,6 @@ const renderedContent = await Promise.all(
   })
 );
 const languageContent = renderedContent.filter((item): item is NonNullable<typeof item> => Boolean(item));
-const readingTimeMin = calculateReadingTimeFromMarkdown(
-  (postGroup.defaultPost as any).body || postGroup.defaultPost.data.description || ''
-);
 ---
 
 <BlogPost
@@ -50,7 +46,6 @@ const readingTimeMin = calculateReadingTimeFromMarkdown(
   languageMeta={getBlogLanguageMeta(postGroup)}
   prevPost={prev}
   nextPost={next}
-  readingTimeMin={readingTimeMin}
 >
   {languageContent.map(({ language, Content }) => (
     <div

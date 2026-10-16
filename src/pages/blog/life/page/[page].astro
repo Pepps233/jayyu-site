@@ -1,0 +1,16 @@
+---
+import BlogIndex from '../../../../components/blog/BlogIndex.astro';
+import { BLOG_PAGE_SIZE, getBlogPostGroups, getBlogSection } from '../../../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = (await getBlogPostGroups()).filter((post) => getBlogSection(post) === 'life');
+  const totalPages = Math.max(1, Math.ceil(posts.length / BLOG_PAGE_SIZE));
+  return Array.from({ length: totalPages - 1 }, (_, index) => ({
+    params: { page: String(index + 2) },
+  }));
+}
+
+const currentPage = Number(Astro.params.page);
+---
+
+<BlogIndex section="life" currentPage={currentPage} />

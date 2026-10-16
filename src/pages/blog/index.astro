@@ -1,26 +1,5 @@
 ---
-import SiteShell from '../../components/SiteShell.astro';
-import BlogLogHeader from '../../components/blog/BlogLogHeader.astro';
-import BlogPostList from '../../components/blog/BlogPostList.astro';
-import BlogPagination from '../../components/ui/nav/BlogPagination.astro';
-import { getBlogPostGroups } from '../../lib/blog';
-
-const PAGE_SIZE = 6;
-const posts = await getBlogPostGroups();
-const firstPagePosts = posts.slice(0, PAGE_SIZE);
-const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+import BlogIndex from '../../components/blog/BlogIndex.astro';
 ---
 
-<SiteShell bodyClass="blog-list-page" title="Blog" description="Notes and essays by Jay Yu.">
-  <Fragment slot="head">
-    {totalPages > 1 && <link rel="next" href="/blog/page/2/" />}
-  </Fragment>
-
-  <BlogLogHeader
-    title="Blog"
-    description="Notes, essays, and build records."
-  />
-
-  <BlogPostList posts={firstPagePosts} title="Recent posts" />
-  <BlogPagination currentPage={1} totalPages={totalPages} />
-</SiteShell>
+<BlogIndex section="research" />

@@ -1,11 +1,14 @@
 ---
+import type { BlogSection } from '../../lib/blog';
+
 interface Props {
   title: string;
   description?: string;
   label?: string;
+  section?: BlogSection;
 }
 
-const { title, description, label } = Astro.props as Props;
+const { title, description, label, section } = Astro.props as Props;
 ---
 
 <section class="blog-log-header">
@@ -19,6 +22,10 @@ const { title, description, label } = Astro.props as Props;
       <button type="button" class="blog-list-translate" data-blog-translate-all hidden>
         <span data-blog-list-translate-label>Translate to 中文</span>
       </button>
+      <nav class="blog-topic-toggle" aria-label="Blog topics">
+        <a href="/blog/" class="no-underline" aria-current={section === 'research' ? 'page' : undefined}>Research</a>
+        <a href="/blog/life/" class="no-underline" aria-current={section === 'life' ? 'page' : undefined}>Life</a>
+      </nav>
     </div>
   </div>
 </section>

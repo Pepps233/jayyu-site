@@ -1,43 +1,16 @@
 ---
-import SiteShell from '../../../components/SiteShell.astro';
-import BlogLogHeader from '../../../components/blog/BlogLogHeader.astro';
-import BlogPostList from '../../../components/blog/BlogPostList.astro';
-import BlogPagination from '../../../components/ui/nav/BlogPagination.astro';
-import { getBlogPostGroups } from '../../../lib/blog';
-
-const PAGE_SIZE = 6;
+import BlogIndex from '../../../components/blog/BlogIndex.astro';
+import { BLOG_PAGE_SIZE, getBlogPostGroups, getBlogSection } from '../../../lib/blog';
 
 export async function getStaticPaths() {
-  const PAGE_SIZE = 6;
-  const posts = await getBlogPostGroups();
-  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+  const posts = (await getBlogPostGroups()).filter((post) => getBlogSection(post) === 'research');
+  const totalPages = Math.max(1, Math.ceil(posts.length / BLOG_PAGE_SIZE));
   return Array.from({ length: totalPages - 1 }, (_, index) => ({
     params: { page: String(index + 2) },
   }));
 }
 
-const posts = await getBlogPostGroups();
-const { page } = Astro.params;
-const currentPage = Math.max(1, parseInt(page || '1', 10));
-const start = (currentPage - 1) * PAGE_SIZE;
-const pagePosts = posts.slice(start, start + PAGE_SIZE);
-const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+const currentPage = Number(Astro.params.page);
 ---
 
-<SiteShell bodyClass="blog-list-page" title={`Blog - Page ${currentPage}`} description={`Blog page ${currentPage} by Jay Yu.`}>
-  <Fragment slot="head">
-    {currentPage > 1 && (
-      <link rel="prev" href={currentPage === 2 ? '/blog/' : `/blog/page/${currentPage - 1}/`} />
-    )}
-    {currentPage < totalPages && (
-      <link rel="next" href={`/blog/page/${currentPage + 1}/`} />
-    )}
-  </Fragment>
-
-  <BlogLogHeader
-    title={`Blog / Page ${currentPage}`}
-    description="More notes and essays."
-  />
-  <BlogPostList posts={pagePosts} title="Posts" />
-  <BlogPagination currentPage={currentPage} totalPages={totalPages} />
-</SiteShell>
+<BlogIndex section="research" currentPage={currentPage} />

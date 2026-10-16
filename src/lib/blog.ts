@@ -70,6 +70,21 @@ export function getBlogLanguageMeta(group: BlogPostGroup): BlogLanguageMeta[] {
     .filter((item): item is BlogLanguageMeta => Boolean(item));
 }
 
+export type BlogSection = 'research' | 'life';
+export const BLOG_PAGE_SIZE = 6;
+
+export function getBlogSection(group: BlogPostGroup): BlogSection {
+  if (group.defaultPost.data.section) return group.defaultPost.data.section;
+  const tags = group.defaultPost.data.tags || [];
+  return tags.some((tag) => ['personal', 'books', 'reflection'].includes(tag.toLowerCase()))
+    ? 'life'
+    : 'research';
+}
+
+export function getBlogIndexHref(section: BlogSection): string {
+  return section === 'life' ? '/blog/life/' : '/blog/';
+}
+
 export async function getBlogPostGroups(): Promise<BlogPostGroup[]> {
   const posts = await getCollection('blog');
   const groups = new Map<

@@ -17,6 +17,7 @@ const blog = defineCollection({
 			heroImage: image().optional(),
 			tags: z.array(z.string()).optional(),
             category: z.string().optional(),
+            section: z.enum(['research', 'life']).optional(),
 			author: z.string().optional(),
 			pinned: z.boolean().default(false),
 			language: blogLanguage.default('en'),

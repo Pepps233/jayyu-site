@@ -1,0 +1,34 @@
+---
+import SiteShell from '../SiteShell.astro';
+import BlogLogHeader from './BlogLogHeader.astro';
+import BlogPostList from './BlogPostList.astro';
+import BlogPagination from '../ui/nav/BlogPagination.astro';
+import { BLOG_PAGE_SIZE, getBlogIndexHref, getBlogPostGroups, getBlogSection, type BlogSection } from '../../lib/blog';
+
+interface Props {
+  section: BlogSection;
+  currentPage?: number;
+}
+
+const { section, currentPage = 1 } = Astro.props;
+const posts = (await getBlogPostGroups()).filter((post) => getBlogSection(post) === section);
+const pagePosts = posts.slice((currentPage - 1) * BLOG_PAGE_SIZE, currentPage * BLOG_PAGE_SIZE);
+const totalPages = Math.max(1, Math.ceil(posts.length / BLOG_PAGE_SIZE));
+const firstPagePath = getBlogIndexHref(section);
+const basePath = `${firstPagePath}page`;
+const pageHref = (page: number) => page === 1 ? firstPagePath : `${basePath}/${page}/`;
+const sectionTitle = section === 'life' ? 'Life' : 'Research';
+const description = section === 'life'
+  ? 'Reflections, books, and stories from everyday life.'
+  : 'Research notes, technical experiments, and things I build.';
+---
+
+<SiteShell bodyClass="blog-list-page" title={`Blog / ${sectionTitle}${currentPage > 1 ? ` / Page ${currentPage}` : ''}`} description={description}>
+  <Fragment slot="head">
+    {currentPage > 1 && <link rel="prev" href={pageHref(currentPage - 1)} />}
+    {currentPage < totalPages && <link rel="next" href={pageHref(currentPage + 1)} />}
+  </Fragment>
+  <BlogLogHeader title={`Blog / ${sectionTitle}`} description={description} section={section} />
+  <BlogPostList posts={pagePosts} title={`${sectionTitle} posts`} />
+  <BlogPagination currentPage={currentPage} totalPages={totalPages} basePath={basePath} firstPagePath={firstPagePath} />
+</SiteShell>

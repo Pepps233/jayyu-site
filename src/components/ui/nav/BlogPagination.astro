@@ -2,11 +2,12 @@
 interface Props {
   currentPage: number;
   totalPages: number;
+  firstPagePath?: string;
   basePath?: string; // e.g. '/blog/page'
 }
 
-const { currentPage, totalPages, basePath = '/blog/page' } = Astro.props as Props;
-const prevHref = currentPage > 1 ? (currentPage === 2 ? '/blog/' : `${basePath}/${currentPage - 1}/`) : null;
+const { currentPage, totalPages, basePath = '/blog/page', firstPagePath = '/blog/' } = Astro.props as Props;
+const prevHref = currentPage > 1 ? (currentPage === 2 ? firstPagePath : `${basePath}/${currentPage - 1}/`) : null;
 const nextHref = currentPage < totalPages ? `${basePath}/${currentPage + 1}/` : null;
 ---
 
