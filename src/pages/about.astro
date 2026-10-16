@@ -1,25 +1,19 @@
 ---
+import { Image } from 'astro:assets';
+import portrait from '../../public/images/about-page-photo.png';
+import '../styles/about.css';
 import SiteShell from '../components/SiteShell.astro';
 import PageHeader from '../components/PageHeader.astro';
 ---
 
-<SiteShell title="About Jay Yu" description="A short profile for Jay Yu.">
+<SiteShell bodyClass="about-page" title="About Jay Yu" description="A short profile for Jay Yu.">
   <PageHeader
     title="About"
     description="A short profile for Jay Yu and current focus."
   />
 
-  <section class="dev-section">
-    <div class="about-profile" aria-label="Profile">
-      <img
-        class="about-profile__photo"
-        src="/images/about-page-photo.png"
-        alt="Jay Yu"
-        width="360"
-        height="360"
-      />
-    </div>
-    <div class="prose">
+  <section class="about-content" aria-label="About Jay">
+    <div class="about-copy">
       <p>
         Hey, I'm Jay.
         I study CS with a concentration in ML at Purdue University.
@@ -44,5 +38,15 @@ import PageHeader from '../components/PageHeader.astro';
         And if you're curious to go deeper, check out my LinkedIn for technical progress and my X for technical discussions.
       </p>
     </div>
+    <figure class="about-portrait">
+      <Image
+        src={portrait}
+        alt="Jay Yu"
+        widths={[160, 224, 448]}
+        sizes="(max-width: 720px) 160px, 224px"
+        width={448}
+        loading="eager"
+      />
+    </figure>
   </section>
 </SiteShell>

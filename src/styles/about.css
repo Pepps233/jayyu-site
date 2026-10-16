@@ -1,0 +1,114 @@
+.about-page {
+  min-height: 100vh;
+  background: #fff;
+  color: #414141;
+}
+
+.about-page .site-grid-bg {
+  display: none;
+}
+
+.about-page .site-main {
+  width: min(1120px, calc(100% - 48px));
+  padding-top: 72px;
+}
+
+.about-page .page-header {
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-color: #e2e2e2;
+}
+
+.about-page .page-header__grid {
+  display: block;
+}
+
+.about-page .page-header h1 {
+  max-width: none;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.about-page .page-header h1::before {
+  content: "[";
+}
+
+.about-page .page-header h1::after {
+  content: "]";
+}
+
+.about-page .page-header p {
+  max-width: 66ch;
+  margin-top: 20px;
+  color: #737373;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: minmax(0, 760px) 224px;
+  justify-content: space-between;
+  align-items: start;
+  gap: 48px;
+}
+
+.about-copy {
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+.about-copy p {
+  margin: 0 0 1.5em;
+}
+
+.about-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.about-portrait {
+  margin: 0;
+  padding: 18px;
+  border: 1px solid #e2e2e2;
+}
+
+.about-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+}
+
+.about-page .dev-footer {
+  width: min(1120px, calc(100% - 48px));
+  margin-top: 72px;
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .about-page .site-main {
+    padding-top: 40px;
+  }
+
+  .about-page .page-header {
+    margin-bottom: 32px;
+  }
+
+  .about-content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .about-copy {
+    font-size: 14px;
+  }
+
+  .about-portrait {
+    width: 160px;
+    justify-self: end;
+    padding: 12px;
+  }
+}
