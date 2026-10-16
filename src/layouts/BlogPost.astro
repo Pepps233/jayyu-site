@@ -2,6 +2,9 @@
 import { Image } from 'astro:assets';
 import SiteShell from '../components/SiteShell.astro';
 import PostMeta from '../components/ui/meta/PostMeta.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import ShareButtons from '../components/ui/share/ShareButtons.astro';
+import '../styles/blog-article.css';
 import PostNav from '../components/ui/nav/PostNav.astro';
 import { slugifyTag } from '../lib/slug';
 import BlogTranslationScript from '../components/blog/BlogTranslationScript.astro';
@@ -45,6 +48,7 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
   lang={documentLanguage}
   image={heroImage}
   mainClass="article-main"
+  bodyClass="blog-article-page"
 >
   <Fragment slot="head">
     <meta property="og:type" content="article" />
@@ -89,14 +93,20 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
     data-current-language={postGroup.defaultLanguage}
     data-languages={languages}
   >
+    <a class="article-back no-underline" href="/blog/">
+      <span aria-hidden="true">←</span> Back
+    </a>
     {showHeader && (
-      <header class:list={['article-hero', { 'article-hero--text-only': !heroImage }]}>
-        {heroImage && (
-          <div class="article-hero__media">
-            <Image width={1280} height={720} src={heroImage} alt="" />
+      <header class="article-heading">
+        <div class="article-column">
+          <div class="article-heading__meta">
+            <FormattedDate date={pubDate} />
+            {languageMeta.length > 1 && (
+              <button type="button" class="article-language" data-blog-translate-toggle>
+                <span data-blog-translate-label>Translate</span>
+              </button>
+            )}
           </div>
-        )}
-        <div class="article-terminal">
           <h1 class="blog-translation-stack" data-blog-copy="title">
             {languageMeta.map((item) => (
               <span
@@ -108,44 +118,28 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
               </span>
             ))}
           </h1>
-          <p class="blog-translation-stack" data-blog-copy="description">
-            {languageMeta.map((item) => (
-              <span
-                class:list={['blog-lang-fragment', { 'is-active': item.language === postGroup.defaultLanguage }]}
-                data-blog-lang={item.language}
-                aria-hidden={item.language === postGroup.defaultLanguage ? 'false' : 'true'}
-              >
-                {item.description}
-              </span>
-            ))}
-          </p>
-          {tags.length > 0 && (
-            <div class="chip-row">
-              {tags.map((tag) => (
-                <a class="sw-tag" href={`/blog/tag/${slugifyTag(tag)}/`}>{tag}</a>
-              ))}
-            </div>
-          )}
+          <a class="article-byline no-underline" href={`/blog/author/${slugifyTag(authorName)}/`}>{authorName}</a>
         </div>
       </header>
     )}
 
-    <div class="article-grid">
-      <div class="article-aside">
-        <PostMeta
-          pubDate={pubDate}
-          readingTimeMin={readingTimeMin}
-          authorName={authorName}
-          title={title}
-          url={Astro.url.toString()}
-          showTranslation={languageMeta.length > 1}
-        />
-      </div>
+    <div class="article-body">
       <div class="prose article-prose">
         <slot />
-        <PostNav prev={prevPost} next={nextPost} />
       </div>
+      {heroImage && (
+        <aside class="article-figure" aria-label="Article illustration">
+          <Image width={480} src={heroImage} alt="" />
+        </aside>
+      )}
     </div>
+    <footer class="article-end article-column">
+      <div class="article-end__details">
+        <PostMeta readingTimeMin={readingTimeMin} authorName={authorName} />
+        <ShareButtons title={title} url={new URL(Astro.url.pathname, Astro.site).toString()} />
+      </div>
+      <PostNav prev={prevPost} next={nextPost} />
+    </footer>
   </article>
   <BlogTranslationScript />
 </SiteShell>

@@ -1,35 +1,19 @@
 ---
 import { author } from '../../../data/author';
-import FormattedDate from '../../FormattedDate.astro';
-import { slugifyTag as slugify } from '../../../lib/slug';
-import ShareButtons from '../share/ShareButtons.astro';
+import { slugifyTag } from '../../../lib/slug';
 
 interface Props {
-  pubDate: Date;
   readingTimeMin: number;
   authorName?: string;
-  title: string;
-  url: string;
-  showTranslation?: boolean;
 }
 
-const { pubDate, readingTimeMin, authorName, title, url, showTranslation = false } = Astro.props as Props;
-const displayName = authorName || author.name;
+const { readingTimeMin, authorName = author.name } = Astro.props as Props;
 ---
 
-<aside class="module-card article-meta-card" aria-label="Post metadata">
-  <div class="article-meta-card__author">
-    <img src={author.avatar.src} alt={author.name} width="42" height="42" />
-    <div>
-      <span class="module-label">Author</span>
-      <a href={`/blog/author/${slugify(displayName)}/`} class="article-meta-card__name no-underline">{displayName}</a>
-    </div>
+<div class="article-author">
+  <img src={author.avatar.src} alt="" width="32" height="32" loading="lazy" />
+  <div>
+    <a href={`/blog/author/${slugifyTag(authorName)}/`} class="no-underline">{authorName}</a>
+    <span class="article-reading-time">{readingTimeMin} min read</span>
   </div>
-  <dl>
-    <dt>Date</dt>
-    <dd><FormattedDate date={pubDate} /></dd>
-    <dt>Read</dt>
-    <dd>{readingTimeMin} min</dd>
-  </dl>
-  <ShareButtons title={title} url={url} showTranslation={showTranslation} />
-</aside>
+</div>
