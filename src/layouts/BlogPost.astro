@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import SiteShell from '../components/SiteShell.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import '../styles/blog-article.css';
@@ -123,11 +122,6 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
       <div class="prose article-prose">
         <slot />
       </div>
-      {heroImage && (
-        <aside class="article-figure" aria-label="Article illustration">
-          <Image width={480} src={heroImage} alt="" />
-        </aside>
-      )}
     </div>
     {Astro.slots.has('citations') && (
       <aside class="article-citations article-column" aria-label="References">
