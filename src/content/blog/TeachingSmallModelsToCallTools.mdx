@@ -1,0 +1,134 @@
+---
+title: 'Teaching a Small Model When to Call a Tool with On-Policy Distillation with Token-Level Teacher Feedback'
+description: 'My experiment and design decisions distilling Qwen3.5-0.8B: improving results on 500 BFCL-V4 tasks by 13.27 percentage points'
+pubDate: 'Oct 16 2026'
+tags: ['AI', 'LLM', 'Distillation', 'Tool Calling']
+language: 'en'
+defaultLanguage: 'en'
+translationKey: 'qwen-tool-calling-distillation'
+---
+
+import QwenDistillationDiagram from '../../components/blog/QwenDistillationDiagram.astro';
+
+One of the smallest and most accessible multimodal models is **Qwen3.5-0.8B**, and this experiment pairs it with the next two sizes up in the same family: **Qwen3.5-2B** and **Qwen3.5-4B**.
+The focus is to measure how much a small model gains from distillation with a larger teacher, and whether it can outscore a model 2.5x its size.
+
+On a frozen sample of **500 BFCL-V4 single-turn tasks**, the stock 0.8B model averaged **57.80%** accuracy.
+Distilled with Qwen3.5-2B as the teacher, which provides another comparison baseline, the 0.8B model reached **60.80%**, but its accuracy on no-call tasks fell from **79.11% to 38.22%**.
+Distilled with the Qwen3.5-4B teacher instead, it reached **71.07% overall** and **81.11% on no-call tasks**.
+
+The [final distilled 0.8B model](https://huggingface.co/Pepps233/Qwen3.5-0.8B-ToolCalling-OPD)[^opd-model] scores about **6 percentage points higher** than stock Qwen3.5-2B, a model 2.5x its size, on these single-turn tool calls.
+
+For comparison, the same 0.8B model was also distilled from the same 4B teacher through [full supervised fine-tuning](https://huggingface.co/Pepps233/Qwen3.5-0.8B-ToolCalling-SFT)[^sft-model], which reached **71.67%**, about the same score as on-policy distillation.
+
+## What the student should learn
+
+Tool calling asks a model to turn a request into a structured function call: choose the right function and supply the right arguments.
+A single request can require several calls, and sometimes none of the available functions can help.
+In that last case, declining to call a tool is the correct answer. These are **no-call tasks**.
+
+For example, imagine asking for a restaurant reservation when the only available tool checks the weather forecast.
+A well-formed weather call would still be wrong, because it doesn't solve the problem at hand.
+
+## Training setup
+
+**SkyRL** was used for on-policy distillation ([Agarwal et al., 2023](https://doi.org/10.48550/arXiv.2306.13649))[^agarwal] on two H100s.
+The student generated fresh responses to the selected prompts, and the teacher scored the exact tokens the student had produced.
+Those teacher scores supplied the learning signal for each student weight update, and after each update, the rollout engine received the new student weights.
+
+For each sampled token, the reward is:
+
+<p>r<sub>t</sub> = log p<sub>teacher</sub>(y<sub>t</sub> | prefix) − log p<sub>student</sub>(y<sub>t</sub> | prefix)</p>
+
+Here, y<sub>t</sub> is the student's t-th token, and the prefix is the prompt plus every token sampled before it.
+Summed over a response, these rewards form a single-sample estimate of the negative reverse KL divergence from the student to the teacher.
+
+<QwenDistillationDiagram kind="training" />
+
+The frozen teacher ran on one H100, while the student learner and rollout engine shared the other, using Modal for compute and vLLM for serving.
+
+Settings:
+
+- **Thinking disabled:** short, structured answers mean less generation and scoring overhead.
+- **A 1,024-token output cap and 16,384-token context:** single-turn tool calls are short, so 1,024 output tokens is generally enough.
+- **Four prompts per batch, one rollout per prompt:** this keeps the training loop small.
+- **One epoch at a learning rate of `1e-6`:** a starting estimate rather than a tuned value.
+- **A checkpoint and Hugging Face export every five updates:** intermediate versions stay available for inspection and recovery.
+
+Before the full run, check tokenizer compatibility so that the teacher and student scores refer to the same sampled token IDs.
+
+## Selecting training data
+
+The training data came from a pool of 6,500 examples derived from [xLAM](https://huggingface.co/datasets/Salesforce/xlam-function-calling-60k) and [ToolACE](https://huggingface.co/datasets/Team-ACE/ToolACE).
+These examples were converted locally into single-turn requests with tool definitions and reference calls, and 325 were set aside for held-out evaluation.
+
+Of the 6,500 examples, 5,000 were screened as candidate prompts by running the stock 0.8B student twice on each one.
+If either attempt failed, the prompt went to the teacher, including prompts where the student succeeded once and failed once.
+In total, the student failed at least one attempt on 2,911 prompts.
+
+The 2B teacher passed 1,030 of those 2,911 prompts.
+Keeping the ones it also passed in at least two of three fresh consistency attempts left 877 prompts for the first distilled model.
+The 4B teacher passed 1,293 of the same 2,911 prompts (44.42%), and the same rule left 1,185.
+
+## The 500 BFCL-V4 tasks
+
+A uniform random sample of 500 examples was frozen, without replacement, from the 3,641 examples in the single-turn portion of the [Berkeley Function Calling Leaderboard (BFCL)](https://gorilla.cs.berkeley.edu/leaderboard.html).
+BFCL's [pinned category definitions](https://github.com/ShishirPatil/gorilla/blob/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/constants/category_mapping.py) separate these single-turn tasks from the benchmark's multi-turn, memory, and web-search categories.
+
+The sample contains 150 no-call tasks and 350 other call/relevance tasks.
+It covers simple calls, choosing among multiple functions, parallel calls, and irrelevance detection, including Python, Java, and JavaScript cases.
+
+For scoring, the pinned official BFCL preprocessing, function-call decoder, and AST/relevance checkers were used through a local adapter.
+Each model made three attempts on every task with identical settings: thinking disabled, temperature `0.6`, top-p `0.95`, top-k `20`, a 1,024-token output cap, and BF16 serving.
+The mean below averages the three run accuracies.
+Note that 1,500 responses per model still represent only 500 distinct problems.
+
+<QwenDistillationDiagram kind="results" />
+
+The individual runs, shown as correct answers out of 500:
+
+<QwenDistillationDiagram kind="runs" />
+
+## A stronger teacher and more no-call coverage
+
+After distilling the stock 0.8B model with the 2B teacher, the 4B teacher was used for a separate run, again starting from stock 0.8B.
+Only 86 of the first run's 877 prompts (9.8%) were no-call examples, while the BFCL sample is 30% no-call.
+
+After applying the same two-of-three rule, 1,185 prompts were left, including only 133 no-call examples.
+The 4B teacher also attempted 350 additional no-call candidates three times each, and the 292 it passed at least twice were added to the training set.
+Unlike the screened prompts, these were not required to be student failures.
+The goal was to prevent the same drop in no-call accuracy and to keep the training set from being dominated by call tasks.
+
+The resulting dataset contained 1,477 prompts: 541 xLAM calls, 511 ToolACE calls, and 425 no-call examples (~29%).
+
+On the unchanged BFCL sample, the new distilled model reached **71.07%** overall, a gain of **13.27 percentage points** over stock 0.8B and **10.27 points** over the 0.8B model distilled from 2B.
+No-call accuracy recovered to **81.11%**, and the specialized student also exceeded stock 2B's **65.13%** on this sample.
+
+There was still a slight tradeoff.
+The new model passed 701 of 1,050 attempts on the 350 call/relevance tasks, or 66.76%, compared with 70.48% for the model distilled from 2B.
+The large recovery in no-call behavior came with a smaller decline on the other tasks.
+
+## Comparison with supervised fine-tuning
+
+The 4B teacher was also distilled into stock 0.8B through supervised fine-tuning (SFT).
+Instead of scoring fresh student rollouts, SFT trains on fixed targets: one verified, non-truncated 4B answer for each of the same 1,477 prompts.
+It updated every weight of the text model, without LoRA, for three epochs at batch size 16 and a learning rate of `2e-5` on a single H100.
+Because that differs from the on-policy run above in epochs, batch size, and update count, a second on-policy run matched SFT's batch size of 16 and three epochs while keeping the learning rate at `1e-6`.
+
+<QwenDistillationDiagram kind="sft" />
+
+SFT (71.67%) and the matched on-policy run (71.40%) differ by four correct responses out of 1,500, which doesn't establish a winner.
+The split differs more: SFT was strongest on no-call tasks at 87.56%, while the matched on-policy run was strongest on the other 350 tasks at 72.00% but fell to 70.00% on no-call.
+One plausible but unverified explanation is that SFT trains directly on correct teacher answers, including correct abstentions, while the teacher's token preferences on the student's own attempts can still favor a plausible call.
+Learning rate, optimizer settings, and loss also differ, so this comparison does not isolate the two methods.
+
+## For the future
+
+Keep the teacher and training-set size fixed while varying the no-call proportion.
+This would help separate the effect of coverage from the effect of a stronger teacher or simply more training prompts.
+
+[^agarwal]: Agarwal, R., Vieillard, N., Zhou, Y., Stanczyk, P., Ramos, S., Geist, M., & Bachem, O. (2023). On-policy distillation of language models: Learning from self-generated mistakes. arXiv. https://doi.org/10.48550/arXiv.2306.13649
+
+[^opd-model]: Pepps233. (2026). Qwen3.5-0.8B-ToolCalling-OPD [Model]. Hugging Face. https://huggingface.co/Pepps233/Qwen3.5-0.8B-ToolCalling-OPD
+
+[^sft-model]: Pepps233. (2026). Qwen3.5-0.8B-ToolCalling-SFT [Model]. Hugging Face. https://huggingface.co/Pepps233/Qwen3.5-0.8B-ToolCalling-SFT

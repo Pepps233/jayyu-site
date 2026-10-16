@@ -1,0 +1,334 @@
+---
+interface Props {
+  kind: 'training' | 'results' | 'runs' | 'sft';
+}
+
+const { kind } = Astro.props;
+const models = [
+  { name: 'Stock 0.8B', overall: 57.80, noCall: 79.11, runs: [301, 290, 276] },
+  { name: '0.8B distilled from 2B', detail: '877 training prompts', overall: 60.80, noCall: 38.22, runs: [304, 299, 309] },
+  { name: 'Stock 2B', overall: 65.13, noCall: 74.67, runs: [325, 318, 334] },
+  { name: '0.8B distilled from 4B', detail: '1,477 training prompts', overall: 71.07, noCall: 81.11, runs: [354, 355, 357] },
+  { name: 'Stock 4B', overall: 79.33, noCall: 84.22, runs: [395, 397, 398] },
+];
+
+// All three runs start from stock 0.8B and train on the same 1,477 prompts selected with the 4B teacher.
+const methods = [
+  { name: 'On-policy', detail: 'batch 4 · 1 epoch', overall: 71.07, noCall: 81.11, other: 66.76 },
+  { name: 'On-policy', detail: 'batch 16 · 3 epochs', overall: 71.40, noCall: 70.00, other: 72.00 },
+  { name: 'Supervised', detail: 'batch 16 · 3 epochs', overall: 71.67, noCall: 87.56, other: 64.86 },
+];
+
+const resultSeries = [
+  { key: 'overall', label: 'All 500 tasks', className: 'overall-key' },
+  { key: 'noCall', label: '150 no-call tasks', className: 'no-call-key' },
+] as const;
+const methodSeries = [
+  ...resultSeries,
+  { key: 'other', label: '350 call/relevance tasks', className: 'other-key' },
+] as const;
+
+const resultGroups = models.map((model) => ({
+  name: model.name,
+  detail: model.detail,
+  bars: resultSeries.map((series) => ({ ...series, value: model[series.key] })),
+}));
+const methodGroups = methods.map((method) => ({
+  name: method.name,
+  detail: method.detail,
+  bars: methodSeries.map((series) => ({ ...series, value: method[series.key] })),
+}));
+
+const chart = kind === 'results'
+  ? { title: 'The overall score needs a second look', subtitle: 'Mean accuracy across three attempts on the same 500 BFCL tasks.', series: resultSeries, groups: resultGroups }
+  : { title: 'Same overall score, different behavior', subtitle: 'The 0.8B student distilled from the 4B teacher, three attempts on the same 500 BFCL tasks.', series: methodSeries, groups: methodGroups };
+const ticks = [100, 75, 50, 25, 0];
+
+// Illustrative per-token values for a no-call prompt the student answers with a call.
+const tokens = [
+  { text: '<tool_call>', student: -0.3, teacher: -4.1 },
+  { text: 'get_forecast', student: -0.1, teacher: -0.2 },
+  { text: '"city":', student: -0.2, teacher: -0.1 },
+  { text: '"Paris"', student: -0.4, teacher: -0.3 },
+  { text: '</tool_call>', student: -0.1, teacher: -0.1 },
+].map((token) => ({ ...token, reward: Math.round((token.teacher - token.student) * 10) / 10 }));
+const signed = (value: number) => (value > 0 ? `+${value.toFixed(1)}` : value === 0 ? '0.0' : `−${Math.abs(value).toFixed(1)}`);
+const stages = ['Student samples tokens', 'Teacher scores the same tokens', 'Reward per token', 'Update student, sync weights'];
+---
+
+<figure class="experiment-figure">
+  {kind === 'runs' ? (
+    <>
+      <div class="run-scroll" role="region" aria-label="BFCL results by run" tabindex="0">
+        <table>
+          <thead><tr><th scope="col">Model</th><th scope="col">Run 1</th><th scope="col">Run 2</th><th scope="col">Run 3</th><th scope="col">Mean</th></tr></thead>
+          <tbody>
+            {models.map((model) => (
+              <tr><th scope="row">{model.name}</th>{model.runs.map((run) => <td>{run}</td>)}<td>{model.overall.toFixed(2)}%</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <figcaption>Correct answers out of 500 per run. Mean accuracy averages all three runs.</figcaption>
+    </>
+  ) : kind === 'training' ? (
+    <>
+      <div class="opd" data-opd data-stage="4">
+        <div class="figure-heading">One rollout through on-policy distillation</div>
+        <div class="opd-prompt">
+          <span class="node-label">Prompt</span>
+          <strong>“Book a table for two in Paris tonight.”</strong>
+          <span>Only available tool: <code>get_forecast(city)</code>. The correct answer is no call.</span>
+        </div>
+
+        <ol class="opd-stages" aria-hidden="true">
+          {stages.map((stage, index) => <li data-step={index + 1}><span>{index + 1}</span>{stage}</li>)}
+        </ol>
+
+        <div class="opd-tokens">
+          {tokens.map((token, index) => (
+            <div class={`tok${index === 0 ? ' tok-key' : ''}`} data-token={index}>
+              <code class="tok-text">{token.text}</code>
+              <dl>
+                <div class="tok-row tok-student"><dt>log p<sub>student</sub></dt><dd>{signed(token.student)}</dd></div>
+                <div class="tok-row tok-teacher"><dt>log p<sub>teacher</sub></dt><dd>{signed(token.teacher)}</dd></div>
+                <div class={`tok-row tok-reward${token.reward < -1 ? ' is-negative' : ''}`}><dt>r<sub>t</sub></dt><dd>{signed(token.reward)}</dd></div>
+              </dl>
+            </div>
+          ))}
+        </div>
+        <p class="opd-note">The teacher would have replied without a tool, so the penalty lands on <code>&lt;tool_call&gt;</code>. Given that prefix, it agrees with the rest of the call.</p>
+
+        <div class="opd-hardware">
+          <div class="gpu gpu-student">
+            <span class="node-label">H100 · student</span>
+            <strong><span class="gpu-role role-rollout">Rollout engine</span> + <span class="gpu-role role-learner">SkyRL learner</span></strong>
+            <span class="gpu-sync">New weights synced to the rollout engine</span>
+          </div>
+          <div class="gpu gpu-teacher">
+            <span class="node-label">H100 · frozen teacher</span>
+            <strong>Scores the exact sampled token IDs</strong>
+            <span>No new teacher tokens are generated.</span>
+          </div>
+        </div>
+
+        <button class="opd-toggle" type="button" data-opd-toggle hidden>Pause</button>
+      </div>
+      <figcaption>Values are illustrative, and tokens are simplified. Each reward is r<sub>t</sub> = log p<sub>teacher</sub> − log p<sub>student</sub> for the token the student sampled; the update makes negatively rewarded tokens less likely.</figcaption>
+    </>
+  ) : (
+    <>
+      <div class="figure-heading">{chart.title}</div>
+      <p class="figure-subtitle">{chart.subtitle}</p>
+      <div class="chart-legend" aria-hidden="true">
+        {chart.series.map((series) => <span><i class={series.className}></i> {series.label}</span>)}
+      </div>
+      <div class="vchart" aria-hidden="true" style={`--groups: ${chart.groups.length}`}>
+        <div class="vchart-axis">
+          {ticks.map((tick) => <span style={`bottom: ${tick}%`}>{tick}%</span>)}
+        </div>
+        <div class="vchart-plot">
+          {ticks.map((tick) => <div class={`vchart-grid${tick === 0 ? ' is-baseline' : ''}`} style={`bottom: ${tick}%`}></div>)}
+          {chart.groups.map((group) => (
+            <div class="vchart-group">
+              {group.bars.map((bar) => (
+                <div class={`vbar ${bar.className}`} style={`height: ${bar.value}%`}>
+                  <span class="vbar-value">{bar.value.toFixed(1)}</span>
+                  <span class="vbar-tip">{group.name} · {bar.label}: {bar.value.toFixed(2)}%</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div class="vchart-labels">
+          {chart.groups.map((group) => <div><strong>{group.name}</strong>{group.detail && <span>{group.detail}</span>}</div>)}
+        </div>
+      </div>
+      <div class="sr-only"><table>
+        <caption>{chart.title}</caption>
+        <thead><tr><th scope="col">Model</th>{chart.series.map((series) => <th scope="col">{series.label}</th>)}</tr></thead>
+        <tbody>
+          {chart.groups.map((group) => (
+            <tr><th scope="row">{group.name}{group.detail && `, ${group.detail}`}</th>{group.bars.map((bar) => <td>{bar.value.toFixed(2)}%</td>)}</tr>
+          ))}
+        </tbody>
+      </table></div>
+      {kind === 'results' ? (
+        <figcaption>Bar labels round to one decimal. The 0.8B student distilled from 2B improves overall accuracy while losing 40.89 percentage points on no-call tasks. These are sampled BFCL-V4 single-turn results.</figcaption>
+      ) : (
+        <figcaption>Bar labels round to one decimal. Overall scores sit within 0.6 points of each other, while the no-call and call/relevance splits move in opposite directions.</figcaption>
+      )}
+    </>
+  )}
+</figure>
+
+<script>
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-opd]')) {
+    const tokens = [...root.querySelectorAll<HTMLElement>('[data-token]')];
+    const toggle = root.querySelector<HTMLButtonElement>('[data-opd-toggle]');
+    if (reducedMotion.matches || !toggle) continue;
+
+    // Each step sets the stage and how many tokens have reached it; the markup defaults to the finished state.
+    const steps: Array<[stage: number, count: number, wait: number]> = [[1, 0, 700]];
+    for (let stage = 1; stage <= 3; stage += 1) {
+      for (let count = 1; count <= tokens.length; count += 1) steps.push([stage, count, count === tokens.length ? 1100 : 520]);
+    }
+    steps.push([4, tokens.length, 3200]);
+
+    let index = 0;
+    let timer: number | undefined;
+    let paused = false;
+    let visible = false;
+
+    const render = ([stage, count]: [number, number, number]) => {
+      root.dataset.stage = String(stage);
+      tokens.forEach((token, i) => {
+        const reached = i < count;
+        token.classList.toggle('is-sampled', stage > 1 || reached);
+        token.classList.toggle('is-scored', stage > 2 || (stage === 2 && reached));
+        token.classList.toggle('is-rewarded', stage > 3 || (stage === 3 && reached));
+        token.classList.toggle('is-current', stage < 4 && i === count - 1);
+      });
+    };
+    const tick = () => {
+      render(steps[index]);
+      timer = window.setTimeout(tick, steps[index][2]);
+      index = (index + 1) % steps.length;
+    };
+    const sync = () => {
+      window.clearTimeout(timer);
+      if (visible && !paused) tick();
+    };
+
+    render(steps[steps.length - 1]);
+    root.classList.add('is-animated');
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      paused = !paused;
+      toggle.textContent = paused ? 'Play' : 'Pause';
+      sync();
+    });
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      sync();
+    }, { threshold: 0.35 }).observe(root);
+  }
+</script>
+
+<style>
+  .experiment-figure {
+    margin: 2rem 0;
+    padding: clamp(16px, 3vw, 28px);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #f7f9f8;
+    color: #222730;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .figure-heading { font-size: 1.05rem; font-weight: 800; line-height: 1.4; }
+  .figure-subtitle { margin: 0.5rem 0 1rem; color: #606975; }
+  .node-label { font-size: 0.75rem; font-weight: 700; color: #505a65; }
+  figcaption { margin-top: 1.25rem; color: #505a65; font-size: 0.8rem; }
+  .experiment-figure code { font-size: 0.8em; }
+
+  /* Training animation */
+  .opd-prompt { display: grid; gap: 4px; margin-top: 1rem; padding: 14px 16px; border: 1px solid #d9dfe1; border-radius: 6px; background: #fff; }
+  .opd-prompt > span:last-child { color: #505a65; }
+  .opd-stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 16px 0 12px; padding: 0; list-style: none; }
+  .opd-stages li { display: flex; align-items: flex-start; gap: 6px; margin: 0; padding: 8px; border-radius: 6px; background: #e8edeb; color: #505a65; font-size: 0.72rem; font-weight: 700; line-height: 1.3; transition: background 0.3s, color 0.3s; }
+  .opd-stages li > span { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #fff; font-size: 0.68rem; transition: color 0.3s; }
+  .opd[data-stage="1"] [data-step="1"], .opd[data-stage="2"] [data-step="2"],
+  .opd[data-stage="3"] [data-step="3"], .opd[data-stage="4"] [data-step="4"] { background: #00856a; color: #fff; }
+  .opd[data-stage="1"] [data-step="1"] > span, .opd[data-stage="2"] [data-step="2"] > span,
+  .opd[data-stage="3"] [data-step="3"] > span, .opd[data-stage="4"] [data-step="4"] > span { color: #00856a; }
+  .opd[data-stage="2"] [data-step="2"] { background: #496a92; }
+  .opd[data-stage="2"] [data-step="2"] > span { color: #496a92; }
+
+  .opd-tokens { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+  .tok { padding: 10px; border: 1px solid #d9dfe1; border-radius: 6px; background: #fff; transition: border-color 0.3s, box-shadow 0.3s; }
+  .tok-text { display: block; margin-bottom: 8px; padding: 2px 6px; border: 0; background: #eef2f0; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tok dl { display: grid; gap: 3px; margin: 0; }
+  .tok-row { display: flex; justify-content: space-between; gap: 6px; font-size: 0.72rem; font-variant-numeric: tabular-nums; transition: opacity 0.3s, transform 0.3s; }
+  .tok-row dt { color: #606975; }
+  .tok-row dd { margin: 0; font-weight: 700; }
+  .tok-student dd { color: #1d6b58; }
+  .tok-teacher dd { color: #3e5f88; }
+  .tok-reward { margin-top: 3px; padding-top: 5px; border-top: 1px dashed #d9dfe1; }
+  .tok-reward.is-negative dd { color: #a8481c; }
+  .tok-key.is-rewarded { border-color: #c46f2a; box-shadow: inset 0 0 0 1px #c46f2a; }
+  .opd-note { margin: 10px 0 0; color: #505a65; font-size: 0.8rem; transition: opacity 0.4s; }
+
+  .opd-hardware { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+  .gpu { display: grid; align-content: start; gap: 4px; padding: 12px 14px; border: 1px solid #d9dfe1; border-radius: 6px; background: #fff; transition: border-color 0.3s, box-shadow 0.3s; }
+  .gpu > span:last-child { color: #505a65; font-size: 0.8rem; }
+  .gpu-student { border-left: 4px solid #00856a; }
+  .gpu-teacher { border-left: 4px solid #496a92; }
+  .gpu-role { border-radius: 3px; transition: background 0.3s; }
+  .opd-toggle { margin-top: 12px; padding: 4px 12px; border: 1px solid #c9d1d4; border-radius: 4px; background: #fff; color: #222730; font: inherit; font-size: 0.75rem; cursor: pointer; }
+  .opd-toggle:focus-visible { outline: 2px solid #00856a; outline-offset: 2px; }
+
+  /* Hidden states apply only once the script runs, so the static figure stays complete. */
+  .opd.is-animated .tok { opacity: 0.35; }
+  .opd.is-animated .tok.is-sampled { opacity: 1; }
+  .opd.is-animated .tok.is-current { border-color: #8a96a0; box-shadow: 0 0 0 3px #e3e8ea; }
+  .opd.is-animated .tok:not(.is-sampled) .tok-student,
+  .opd.is-animated .tok:not(.is-scored) .tok-teacher,
+  .opd.is-animated .tok:not(.is-rewarded) .tok-reward { opacity: 0; transform: translateY(3px); }
+  .opd.is-animated:not([data-stage="4"]) .opd-note,
+  .opd.is-animated:not([data-stage="4"]) .gpu-sync { opacity: 0; }
+  .gpu-sync { transition: opacity 0.4s; }
+  .opd.is-animated[data-stage="1"] .gpu-student,
+  .opd.is-animated[data-stage="4"] .gpu-student { border-color: #00856a; box-shadow: 0 0 0 3px #d5ebe5; }
+  .opd.is-animated[data-stage="2"] .gpu-teacher { border-color: #496a92; box-shadow: 0 0 0 3px #dbe3ef; }
+  .opd.is-animated[data-stage="1"] .role-rollout,
+  .opd.is-animated[data-stage="4"] .role-learner { background: #d5ebe5; }
+
+  /* Vertical bar charts */
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.8rem; }
+  .chart-legend > span { display: flex; align-items: center; gap: 7px; }
+  .chart-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; }
+  .overall-key { background: #00856a; }
+  .no-call-key { background: #6a8fd6; }
+  .other-key { background: #c46f2a; }
+  .vchart { display: grid; grid-template-columns: 36px minmax(0, 1fr); grid-template-rows: 220px auto; margin-top: 30px; }
+  .vchart-axis { position: relative; }
+  .vchart-axis span { position: absolute; right: 8px; transform: translateY(50%); color: #606975; font-size: 0.68rem; font-variant-numeric: tabular-nums; }
+  .vchart-plot { position: relative; display: grid; grid-template-columns: repeat(var(--groups), minmax(0, 1fr)); }
+  .vchart-grid { position: absolute; left: 0; right: 0; border-top: 1px solid #e3e8e6; }
+  .vchart-grid.is-baseline { border-top-color: #9aa4ad; }
+  .vchart-group { position: relative; display: flex; align-items: flex-end; justify-content: center; gap: 2px; padding: 0 6%; }
+  .vbar { position: relative; flex: 1 1 0; max-width: 34px; border-radius: 4px 4px 0 0; }
+  .vbar-value { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); padding-bottom: 3px; color: #222730; font-size: 0.66rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .vbar-tip { position: absolute; bottom: calc(100% + 20px); left: 50%; z-index: 1; transform: translateX(-50%); padding: 4px 8px; border-radius: 4px; background: #222730; color: #fff; font-size: 0.72rem; white-space: nowrap; pointer-events: none; display: none; }
+  .vbar:hover .vbar-tip { display: block; }
+  .vchart-group:first-child .vbar-tip { left: 0; transform: none; }
+  .vchart-group:last-child .vbar-tip { left: auto; right: 0; transform: none; }
+  .vchart-labels { grid-column: 2; display: grid; grid-template-columns: repeat(var(--groups), minmax(0, 1fr)); gap: 0 4px; padding-top: 8px; }
+  .vchart-labels > div { display: grid; align-content: start; gap: 2px; text-align: center; font-size: 0.75rem; line-height: 1.3; }
+  .vchart-labels span { color: #606975; font-size: 0.7rem; }
+
+  /* Runs table: restore table layout over the article's scrollable display: block tables. */
+  .run-scroll { overflow-x: auto; }
+  .run-scroll:focus-visible { outline: 2px solid #00856a; outline-offset: 2px; }
+  .experiment-figure .run-scroll table { display: table; width: 100%; margin: 0; }
+  .run-scroll th { text-align: left; }
+  .run-scroll tbody th { font-weight: 500; }
+  .run-scroll td, .run-scroll thead th { white-space: nowrap; }
+  .run-scroll td { text-align: right; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 560px) {
+    .opd-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .opd-hardware { grid-template-columns: minmax(0, 1fr); }
+    .vchart { grid-template-columns: 30px minmax(0, 1fr); }
+    .vchart-group { padding: 0 3%; gap: 1px; }
+    .vbar-value { font-size: 0.56rem; }
+    .vchart-labels > div { font-size: 0.66rem; }
+    .vchart-labels span { font-size: 0.62rem; }
+    .run-scroll tbody th { white-space: normal; }
+    .experiment-figure .run-scroll :is(th, td) { padding: 8px 5px; font-size: 0.78rem; }
+  }
+</style>
