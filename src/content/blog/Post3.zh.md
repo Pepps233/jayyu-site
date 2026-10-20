@@ -9,41 +9,56 @@ defaultLanguage: 'en'
 translationKey: 'post3'
 ---
 
-# 探索 LoRA：面向大语言模型的高效微调
+最近，我读完了论文 [*LoRA: Low-Rank Adaptation of Large Language Models*](https://arxiv.org/abs/2106.09685)，想了解如何用更少的可训练参数，让大语言模型适应特定任务。
+最吸引我的是，它把预训练模型已经掌握的知识与新任务所需的改动分开了。
 
-**总结：**
+## 全量微调为什么成本高
 
-这篇文章是我对 LoRA，也就是 Low-Rank Adaptation 的一次深入学习记录。
+全量微调会更新模型的所有参数。
+对于大模型，为每个任务保留一个独立版本，很快就会带来高昂的训练显存和存储成本。
 
-LoRA 让大语言模型可以用更低的算力和存储成本完成高效的任务微调。
+**LoRA 冻结预训练权重**，只学习一小部分任务专属参数。
+这样就能让模型适应新任务，而不必为每个任务再存储一份完整的模型权重。
 
----
+## 学习低秩更新
 
-最近，我读完了论文 **LoRA: Low-Rank Adaptation of Large Language Models**。
+核心思路是用两个较小的矩阵 **A** 和 **B** 表示权重更新。
+对于冻结的权重矩阵 W，适配后的权重为：
 
-我想借此学习如何优化和调整 generative pre-trained transformers。
+<p>W′ = W + (α / r) BA</p>
 
-**LoRA** 是一种通过 low-rank adapters 对大语言模型进行轻量微调的方法。
+其中，**r** 是 adapter 的秩，**α** 控制更新的缩放比例。
+训练时只更新 A 和 B。
+对于一个 d 行、k 列的矩阵，可训练参数量由 dk 变成了 r(d + k)。
+当 r 较小时，两者的差距非常明显。
 
-下面是我从论文中学到的几个最有意思的观点：
+论文的假设是，任务适配所需的权重变化可以具有较低的内在秩。
+这并不要求原模型的权重矩阵本身也是低秩的。
 
-1. **轻量级 adapters：** LoRA 允许我们为大语言模型训练轻量级 adapters。
-以 GPT-3 为例，原模型约为 350GB。
-如果训练 100 个不同的 LoRA adapters，总存储只会增加到约 354GB，而不是 35TB。
-2. **低内在维度：** 预训练语言模型具有 low intrinsic dimension。
-这意味着即使被投影到更小的子空间中，它们也能高效学习。
-3. **高效微调：** LoRA 会冻结原始模型权重，只更新 low-rank matrices。
-这种方式让微调更便宜、更快，也更节省内存。
-4. **任务专门化：** 这种方法支持 task-specific adaptation，而不需要复制庞大的模型。
-它也让不同 adapters 之间的快速切换成为可能。
-5. **强表现：** 在 GLUE、WikiSQL 和 SAMSum 等 benchmark 上，LoRA 的表现接近 full fine-tuning，同时显著降低计算和存储成本。
+## 一个基础模型，多个任务
 
-我很期待未来继续实验这些想法。
+让我印象最深的是 GPT-3 175B 的存储示例。
+使用 16 位精度时，它的权重约占 **350GB**。
+在论文的示例中，一个共享模型加上 100 个小型 LoRA adapters 约需 **354GB**，而 100 份完整模型则需要 **35TB**。
+adapter 的大小取决于秩以及适配哪些矩阵，因此这只是一个示例，并非固定成本。
 
-从创建更小的 task-specific adapters，到探索如何让高效微调技术帮助前沿 AI 模型变得更实用、更可扩展，也更容易被更多人使用。
+这种分离让任务专属 adapters 更容易存储和切换。
+针对单一任务，也可以把学到的更新合并到基础权重中进行推理。
 
-接下来，我准备阅读 Thinking Machines Lab 最近发布的一篇文章 *“LoRA Without Regret”*，继续学习在微调大语言模型时如何调整 hyperparameters。
+## 如何理解这些结果
 
-[Thinking Machines Lab, 2025](https://thinkingmachines.ai/blog/lora/)
+在 **GLUE、WikiSQL 和 SAMSum** 等 benchmark 上，论文报告的 LoRA 结果可以与全量微调相竞争，同时训练的参数少得多。
+这些结果让我觉得 LoRA 很适合作为任务适配的起点，但它们并不保证每个模型、每个数据集上都能得到相同结论。
+
+当我考虑维护同一个模型的多个专用版本时，这种方法的实际价值尤其明显。
+我希望在比较任务表现的同时，也记录训练显存和存储需求。
+
+## 我想继续探索的问题
+
+我想尝试训练小型的任务专属 adapters，观察不同任务到底需要多大的容量。
+改变秩会如何影响效果，又有哪些权重矩阵值得适配？
+
+接下来，我准备阅读 Thinking Machines Lab 的 [*LoRA Without Regret*](https://thinkingmachines.ai/blog/lora/)，这篇文章研究了 LoRA 在什么条件下可以达到全量微调的效果。
+我希望借此更好地理解秩、学习率和其他超参数如何影响两者的比较。
 
 ![LoRA Without Regret](../../assets/images/blog3-2.png)

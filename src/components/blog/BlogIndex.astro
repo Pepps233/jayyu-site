@@ -17,7 +17,7 @@ const totalPages = Math.max(1, Math.ceil(posts.length / BLOG_PAGE_SIZE));
 const firstPagePath = getBlogIndexHref(section);
 const basePath = `${firstPagePath}page`;
 const pageHref = (page: number) => page === 1 ? firstPagePath : `${basePath}/${page}/`;
-const sectionTitle = section === 'life' ? 'Life' : 'Research';
+const sectionTitle = section === 'life' ? 'Life' : 'Technical';
 const description = section === 'life'
   ? 'Reflections, books, and stories from everyday life.'
   : 'Research notes, technical experiments, and things I build.';
