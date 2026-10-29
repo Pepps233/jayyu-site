@@ -29,8 +29,8 @@ const currentlyItems = [
   showFooter={false}
 >
   <Fragment slot="head">
-    <link rel="preload" as="image" href="/images/clouds-poster.jpg" type="image/jpeg" fetchpriority="high" />
-    <link rel="preload" as="video" href="/videos/clouds.mp4" type="video/mp4" />
+    <link rel="preload" as="image" href="/images/ascii-magic-4-poster.jpg" type="image/jpeg" fetchpriority="high" />
+    <link rel="preload" as="video" href="/videos/ascii-magic-4.mp4" type="video/mp4" />
     <style is:inline>
       html.landing-bg-pending .landing-home h1,
       html.landing-bg-pending .landing-name,
@@ -64,7 +64,7 @@ const currentlyItems = [
           reveal();
         };
         poster.onerror = reveal;
-        poster.src = '/images/clouds-poster.jpg';
+        poster.src = '/images/ascii-magic-4-poster.jpg';
 
         if (poster.complete) {
           poster.onload();
@@ -91,10 +91,10 @@ const currentlyItems = [
     muted
     playsinline
     preload="auto"
-    poster="/images/clouds-poster.jpg"
+    poster="/images/ascii-magic-4-poster.jpg"
     aria-hidden="true"
   >
-    <source src="/videos/clouds.mp4" type="video/mp4" />
+    <source src="/videos/ascii-magic-4.mp4" type="video/mp4" />
   </video>
 
   <section class="landing-home" aria-labelledby="home-title">
