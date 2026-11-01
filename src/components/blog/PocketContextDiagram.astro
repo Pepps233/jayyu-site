@@ -1,0 +1,428 @@
+---
+interface Props {
+  kind: 'compass' | 'ace' | 'acm' | 'blocks' | 'kv' | 'clm' | 'comparison';
+}
+
+type FlowItem = { node: string; detail?: string; store?: boolean } | { edge: string };
+type Flow = { label?: string; items: FlowItem[]; note?: string };
+
+const { kind } = Astro.props;
+
+const flows: Record<'compass' | 'ace' | 'acm', { title: string; rows: Flow[]; memory: string; caption: string }> = {
+  compass: {
+    title: 'COMPASS',
+    rows: [
+      {
+        items: [
+          { node: 'Context manager', detail: 'writes a fresh brief' },
+          { edge: 'brief' },
+          { node: 'Main agent', detail: 'ReAct loop' },
+          { edge: 'trace' },
+          { node: 'Meta-thinker', detail: 'watches asynchronously' },
+        ],
+        note: 'The meta-thinker sends its decision (continue, pivot, verify, or stop) back to the context manager, which also reads and updates a note store.',
+      },
+    ],
+    memory: 'A fresh brief and persistent notes; the main agent restarts without its raw trace.',
+    caption: 'Adapted from Wan et al. (2025).',
+  },
+  ace: {
+    title: 'ACE',
+    rows: [
+      {
+        items: [
+          { node: 'Generator', detail: 'attempts the task' },
+          { edge: 'trajectory' },
+          { node: 'Reflector', detail: 'pulls out lessons' },
+          { edge: 'lessons' },
+          { node: 'Curator', detail: 'merges updates' },
+          { edge: 'delta updates' },
+          { node: 'Playbook', store: true },
+        ],
+        note: 'The updated playbook is given to the generator on the next task.',
+      },
+    ],
+    memory: 'A reusable playbook of lessons, refined across tasks.',
+    caption: 'Adapted from Zhang et al. (2026).',
+  },
+  acm: {
+    title: 'ACM',
+    rows: [
+      {
+        label: 'manage_context',
+        items: [
+          { node: 'Main agent' },
+          { edge: 'messages since last compaction' },
+          { node: 'Summarizer' },
+          { edge: 'raw messages' },
+          { node: 'Archive A_k', store: true },
+        ],
+        note: 'Summary k replaces the compacted messages in the agent’s context.',
+      },
+      {
+        label: 'query_memory(k, query)',
+        items: [
+          { node: 'Archive A_k', store: true },
+          { edge: 'raw messages + query' },
+          { node: 'Querier' },
+          { edge: 'extracted findings' },
+          { node: 'Main agent' },
+        ],
+        note: 'The agent receives the querier’s extract, not the archive itself.',
+      },
+    ],
+    memory: 'Tagged summaries and raw archives; recall returns query-specific summarized facts.',
+    caption: 'Adapted from Li et al. (2026).',
+  },
+};
+
+type Step = { phase: number; status: string; wait: number; states: Record<string, string> };
+type Change = Omit<Step, 'states'> & { set: Record<string, string> };
+type AnimFigure = {
+  title: string;
+  subtitle: string;
+  legend: { label: string; state: string }[];
+  phases: string[];
+  chips: { id: string; text: string; detail?: string; title?: string; lane?: string }[];
+  lanes?: { id: string; label: string }[];
+  archive?: { id: string; tag: string; stores: string[]; refs?: string }[];
+  steps: Step[];
+  caption: string;
+};
+
+// Each change is applied on top of the previous step, so steps only list what moves.
+const buildSteps = (initial: Record<string, string>, changes: Change[]): Step[] => {
+  let states = initial;
+  return changes.map(({ set, ...step }) => {
+    states = { ...states, ...set };
+    return { ...step, states };
+  });
+};
+const set = (ids: string[], state: string) => Object.fromEntries(ids.map((id) => [id, state]));
+const sweep = (ids: string[], phase: number, status: string, hold: number): Change[] =>
+  ids.map((id, i) => ({ phase, status, wait: i === ids.length - 1 ? hold : id === 'gap' ? 700 : 240, set: { [id]: 'stale' } }));
+
+const blockIds = Array.from({ length: 10 }, (_, i) => `b${String(i + 1).padStart(3, '0')}`);
+const kvIds = ['b001', 'b002', 'b003', 'b004', 'b005', 'b006', 'b007'];
+
+const animFigures: Record<'blocks' | 'kv' | 'clm', AnimFigure> = {
+  clm: {
+    title: 'Append-only history vs. editable context',
+    subtitle: 'A standard LM keeps the old text. A CLM can change what it sees next.',
+    legend: [{ label: 'Existing text', state: 'block' }, { label: 'New text', state: 'cached' }, { label: 'Selected for editing', state: 'block selected' }, { label: 'Replacement', state: 'summary' }],
+    phases: ['Start', 'Append', 'Select', 'Rewrite', 'Continue'],
+    lanes: [{ id: 'lm', label: 'Standard LM · append only' }, { id: 'clm', label: 'CLM · editable live context' }],
+    chips: [
+      ...['lm', 'clm'].flatMap((lane) => [
+        { id: `${lane}-task`, text: 'Task', lane },
+        { id: `${lane}-search`, text: 'Search results', detail: 'long tool output', lane },
+        ...(lane === 'clm' ? [{ id: 'clm-note', text: 'Key finding', detail: 'rewritten in place', lane }] : []),
+        { id: `${lane}-reason`, text: 'Reasoning', lane },
+        { id: `${lane}-new`, text: 'New result', lane },
+        { id: `${lane}-next`, text: 'Next step', lane },
+      ]),
+    ],
+    steps: buildSteps({
+      ...set(['lm-task', 'lm-search', 'lm-reason', 'clm-task', 'clm-search', 'clm-reason'], 'block'),
+      ...set(['lm-new', 'clm-new', 'lm-next', 'clm-next', 'clm-note'], 'hidden'),
+    }, [
+      { phase: 0, status: 'Both models start with the same task, search results, and reasoning.', wait: 2200, set: {} },
+      { phase: 1, status: 'New results are appended to both contexts.', wait: 2200, set: set(['lm-new', 'clm-new'], 'cached') },
+      { phase: 2, status: 'The CLM chooses the long search output to rewrite in its live context file.', wait: 2200, set: { 'clm-search': 'block selected' } },
+      { phase: 3, status: 'The CLM edits the file with bash: a short finding replaces the long output. The rest stays in place; the standard LM retains the original.', wait: 3400, set: { 'clm-search': 'hidden', 'clm-note': 'summary' } },
+      { phase: 4, status: 'The edited file becomes the CLM’s next-turn context. Both continue, but only the CLM has rewritten its earlier history.', wait: 3800, set: { ...set(['lm-new', 'clm-new'], 'block'), ...set(['lm-next', 'clm-next'], 'cached') } },
+    ]),
+    caption: 'Illustrative rewrite, adapted from Shao et al. (2026). CLMs can also insert or delete text; this example shows replacement, not lossless archival.',
+  },
+  blocks: {
+    title: 'Tags that reference other tags',
+    subtitle: 'Each compaction replaces a contiguous range with one tagged summary.',
+    legend: [{ label: 'Original block', state: 'block' }, { label: 'Tagged summary', state: 'summary' }, { label: 'Selected', state: 'block selected' }],
+    phases: ['Start', 'Compact b001–b003', 'Compact b011–b005'],
+    chips: [
+      { id: 'c2', text: 'ctx-0002', detail: 'refs=ctx-0001' },
+      { id: 'c1', text: 'ctx-0001', detail: 'block b011' },
+      ...blockIds.map((id) => ({ id, text: id })),
+    ],
+    archive: [
+      { id: 'a1', tag: 'ctx-0001', stores: ['b001', 'b002', 'b003'] },
+      { id: 'a2', tag: 'ctx-0002', stores: ['b004', 'b005'], refs: 'ctx-0001' },
+    ],
+    steps: buildSteps({ ...set(blockIds, 'block'), ...set(['c1', 'c2', 'a1', 'a2'], 'hidden') }, [
+      { phase: 0, status: 'The catalog lists ten blocks, b001 through b010.', wait: 1800, set: {} },
+      { phase: 1, status: 'The agent selects b001–b003.', wait: 1400, set: set(blockIds.slice(0, 3), 'block selected') },
+      { phase: 1, status: 'Their summary replaces them, tagged ctx-0001, and becomes block b011.', wait: 2600, set: { ...set(blockIds.slice(0, 3), 'hidden'), c1: 'summary', a1: 'shown' } },
+      { phase: 2, status: 'The agent selects b011 together with b004–b005.', wait: 1400, set: { c1: 'summary selected', ...set(['b004', 'b005'], 'block selected') } },
+      { phase: 2, status: 'The new summary is tagged ctx-0002 refs=ctx-0001. Its archive stores only b004–b005.', wait: 3800, set: { ...set(['c1', 'b004', 'b005'], 'hidden'), c2: 'summary', a2: 'shown' } },
+    ]),
+    caption: 'Block IDs are illustrative.',
+  },
+  kv: {
+    title: 'Worst case: compacting near the start',
+    subtitle: 'Every edit invalidates the cache for everything after it.',
+    legend: [{ label: 'Reused from cache', state: 'cached' }, { label: 'Invalidated', state: 'invalid' }, { label: 'Prefilled this turn', state: 'stale' }],
+    phases: ['Turn t', 'Compact', 'Re-prefill', 'Append', 'Compact again', 'Re-prefill'],
+    chips: [
+      { id: 'sys', text: 'sys' },
+      { id: 'c2', text: 'ctx-0002' },
+      { id: 'c1', text: 'ctx-0001' },
+      ...kvIds.map((id) => ({ id, text: id })),
+      { id: 'gap', text: '…', title: 'b008–b039' },
+      { id: 'b040', text: 'b040' },
+      { id: 'new', text: 'b041–b045' },
+    ],
+    steps: buildSteps({ ...set(['sys', ...kvIds, 'gap', 'b040'], 'cached'), ...set(['c1', 'c2', 'new'], 'hidden') }, [
+      { phase: 0, status: 'Turn t: the cache covers every block through b040.', wait: 1800, set: {} },
+      { phase: 1, status: 'The agent compacts b001–b003, right after the system prompt.', wait: 1400, set: set(kvIds.slice(0, 3), 'cached selected') },
+      { phase: 1, status: 'The edit invalidates every cached block after sys.', wait: 1800, set: { ...set(kvIds.slice(0, 3), 'hidden'), ...set(['c1', ...kvIds.slice(3), 'gap', 'b040'], 'invalid') } },
+      ...sweep(['c1', ...kvIds.slice(3), 'gap', 'b040'], 2, 'Turn t + 1 re-prefills 38 of 39 blocks.', 2000),
+      { phase: 3, status: 'Later turns only append, so just b041–b045 are prefilled.', wait: 2200, set: { ...set(['c1', ...kvIds.slice(3), 'gap', 'b040'], 'cached'), new: 'stale' } },
+      { phase: 4, status: 'The agent compacts ctx-0001 through b006.', wait: 1400, set: { ...set(['c1', 'b004', 'b005', 'b006'], 'cached selected'), new: 'cached' } },
+      { phase: 4, status: 'Same edit point, same invalidation.', wait: 1600, set: { ...set(['c1', 'b004', 'b005', 'b006'], 'hidden'), ...set(['c2', 'b007', 'gap', 'b040', 'new'], 'invalid') } },
+      ...sweep(['c2', 'b007', 'gap', 'b040', 'new'], 5, 'Turn t + k re-prefills 40 of 41 blocks, from the same point.', 3800),
+    ]),
+    caption: 'Block IDs and turn counts are illustrative.',
+  },
+};
+
+const flow = kind in flows ? flows[kind as keyof typeof flows] : undefined;
+const comparison = kind === 'comparison';
+const visibleFlows = comparison ? Object.values(flows) : flow ? [flow] : [];
+const anim = kind in animFigures ? animFigures[kind as keyof typeof animFigures] : undefined;
+const finalStep = anim?.steps[anim.steps.length - 1];
+const isEdge = (item: FlowItem): item is { edge: string } => 'edge' in item;
+---
+
+<figure class:list={['pc-figure', { 'pc-comparison': comparison }]}>
+  {comparison && (
+    <>
+      <div class="pc-heading">Three ways to split context work</div>
+    </>
+  )}
+  {visibleFlows.length > 0 && (
+    <>
+      <div class:list={{ 'pc-comparison-grid': comparison }}>
+        {visibleFlows.map((diagram) => (
+          <div class="pc-method">
+            <div class="pc-heading">{diagram.title}</div>
+            <div class="pc-workflow">
+              {diagram.rows.map((row) => (
+                <div class="pc-flow-row">
+                  {row.label && <div class="pc-row-label"><code>{row.label}</code></div>}
+                  <div class="pc-flow">
+                    {row.items.map((item) =>
+                      isEdge(item) ? (
+                        <div class="pc-edge"><span>{item.edge}</span></div>
+                      ) : (
+                        <div class={`pc-node${item.store ? ' is-store' : ''}`}>
+                          <strong>{item.node}</strong>
+                          {item.detail && <span>{item.detail}</span>}
+                        </div>
+                      ),
+                    )}
+                  </div>
+                  {row.note && <p class="pc-note">↺ {row.note}</p>}
+                </div>
+              ))}
+            </div>
+            {comparison && <div class="pc-memory"><strong>What survives</strong><p>{diagram.memory}</p></div>}
+          </div>
+        ))}
+      </div>
+      <figcaption>{comparison ? 'Adapted from Wan et al. (2025), Zhang et al. (2026), and Li et al. (2026).' : flow?.caption}</figcaption>
+    </>
+  )}
+  {anim && finalStep && (
+    <div class="pc-anim" data-pc-anim data-steps={JSON.stringify(anim.steps)}>
+      <div class="pc-heading">{anim.title}</div>
+      <p class="pc-subtitle">{anim.subtitle}</p>
+      <div class="pc-controls" data-controls hidden>
+        <div class="pc-phases">
+          {anim.phases.map((phase, index) => <button type="button" data-phase={index} aria-pressed="false">{index + 1}. {phase}</button>)}
+        </div>
+        <button class="pc-toggle" type="button" data-toggle>Pause</button>
+      </div>
+      <div class="pc-legend" aria-hidden="true">
+        {anim.legend.map((item) => <span><i class="pc-chip-key" data-state={item.state}></i>{item.label}</span>)}
+      </div>
+      {(anim.lanes ?? [{ id: undefined, label: 'Context window' }]).map((lane) => (
+        <div class="pc-context-row">
+          <div class="pc-row-label">{lane.label}</div>
+          <div class="pc-lane">
+            {anim.chips.filter((chip) => chip.lane === lane.id).map((chip) => (
+              <span class="pc-chip" data-id={chip.id} data-state={finalStep.states[chip.id]} title={chip.title}>
+                <code>{chip.text}</code>
+                {chip.detail && <small>{chip.detail}</small>}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+      <p class="pc-status" data-status>{finalStep.status}</p>
+      {anim.archive && (
+        <div class="pc-archive">
+          <div class="pc-row-label">Archive</div>
+          <div class="pc-archive-cards">
+            {anim.archive.map((entry) => (
+              <div class="pc-archive-card" data-id={entry.id} data-state={finalStep.states[entry.id]}>
+                <code class="pc-archive-tag">{entry.tag}</code>
+                <span>stores</span>
+                {entry.stores.map((id) => <span class="pc-chip" data-state="block"><code>{id}</code></span>)}
+                {entry.refs && <span class="pc-ref">refs <code>{entry.refs}</code></span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <figcaption>{anim.caption}</figcaption>
+    </div>
+  )}
+</figure>
+
+<script>
+  type Step = { phase: number; status: string; wait: number; states: Record<string, string> };
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-pc-anim]')) {
+    const steps: Step[] = JSON.parse(root.dataset.steps ?? '[]');
+    const items = new Map([...root.querySelectorAll<HTMLElement>('[data-id]')].map((el) => [el.dataset.id, el]));
+    const phases = [...root.querySelectorAll<HTMLButtonElement>('[data-phase]')];
+    const status = root.querySelector<HTMLElement>('[data-status]');
+    const controls = root.querySelector<HTMLElement>('[data-controls]');
+    const toggle = root.querySelector<HTMLButtonElement>('[data-toggle]');
+    if (!steps.length || !status || !controls || !toggle) continue;
+
+    // The markup starts on the final step, which stays put without JS or with reduced motion until the reader steps through.
+    let index = steps.length - 1;
+    let timer: number | undefined;
+    let paused = reducedMotion.matches;
+    let visible = false;
+
+    const render = (next: number) => {
+      index = next;
+      const step = steps[index];
+      for (const [id, state] of Object.entries(step.states)) items.get(id)?.setAttribute('data-state', state);
+      status.textContent = step.status;
+      phases.forEach((button, phase) => button.setAttribute('aria-pressed', String(phase === step.phase)));
+    };
+    const tick = () => {
+      timer = window.setTimeout(() => {
+        render((index + 1) % steps.length);
+        tick();
+      }, steps[index].wait);
+    };
+    const sync = () => {
+      window.clearTimeout(timer);
+      toggle.textContent = paused ? 'Play' : 'Pause';
+      if (visible && !paused) tick();
+    };
+
+    render(paused ? index : 0);
+    controls.hidden = false;
+    toggle.addEventListener('click', () => {
+      paused = !paused;
+      if (!paused && index === steps.length - 1) render(0);
+      sync();
+    });
+    phases.forEach((button, phase) => button.addEventListener('click', () => {
+      paused = true;
+      render(steps.findLastIndex((step) => step.phase === phase));
+      sync();
+    }));
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      sync();
+    }, { threshold: 0.35 }).observe(root);
+  }
+</script>
+
+<style>
+  .pc-figure {
+    margin: 2rem 0;
+    padding: clamp(16px, 3vw, 28px);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #f7f9f8;
+    color: #222730;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .pc-heading { font-size: 1.05rem; font-weight: 800; line-height: 1.4; }
+  .pc-subtitle { margin: 0.5rem 0 1rem; color: #606975; }
+  .pc-figure figcaption { margin-top: 1.25rem; color: #505a65; font-size: 0.8rem; }
+  .pc-figure code { font-size: 0.8em; }
+  .pc-row-label { margin-bottom: 6px; color: #505a65; font-size: 0.75rem; font-weight: 700; }
+
+  /* Flow diagrams */
+  .pc-flow-row + .pc-flow-row { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed #d9dfe1; }
+  .pc-flow { display: flex; align-items: stretch; }
+  .pc-node { flex: 1 1 0; min-width: 0; display: grid; align-content: center; gap: 2px; padding: 10px 12px; border: 1px solid #d9dfe1; border-left: 4px solid #00856a; border-radius: 6px; background: #fff; }
+  .pc-node strong { font-size: 0.85rem; line-height: 1.3; }
+  .pc-node span { color: #505a65; font-size: 0.75rem; line-height: 1.3; }
+  .pc-node.is-store { border-left-color: #496a92; background: #eef2f7; }
+  .pc-edge { flex: 0 1 96px; min-width: 56px; display: flex; flex-direction: column; justify-content: center; padding: 0 6px; color: #505a65; font-size: 0.7rem; line-height: 1.25; text-align: center; }
+  .pc-edge::after { content: '→'; color: #8a96a0; font-size: 1.1rem; line-height: 1; }
+  .pc-note { margin: 10px 0 0; color: #505a65; font-size: 0.8rem; }
+
+  /* A single comparison figure, with parallel vertical workflows. */
+  .pc-comparison > .pc-heading { margin-bottom: 1rem; }
+  .pc-comparison-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .pc-comparison .pc-method { min-width: 0; display: grid; grid-row: span 3; grid-template-rows: subgrid; padding: 14px; border: 1px solid #d9dfe1; border-radius: 6px; background: #fff; }
+  .pc-comparison .pc-method > .pc-heading { font-size: 0.9rem; }
+  .pc-comparison .pc-flow { flex-direction: column; }
+  .pc-comparison .pc-node { flex: none; }
+  .pc-comparison .pc-edge { flex: none; min-width: 0; padding: 6px 0; }
+  .pc-comparison .pc-edge::after { content: '↓'; }
+  .pc-comparison .pc-note { font-size: 0.73rem; }
+  .pc-memory { padding-top: 6px; font-size: 0.75rem; }
+  .pc-memory > strong { display: block; padding-top: 10px; border-top: 1px solid #d9dfe1; color: #00856a; }
+  .pc-memory p { margin: 4px 0 0; color: #505a65; }
+
+  /* Animated block lanes */
+  .pc-controls { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+  .pc-controls[hidden] { display: none; }
+  .pc-phases { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pc-phases button { padding: 5px 10px; border: 0; border-radius: 6px; background: #e8edeb; color: #505a65; font: inherit; font-size: 0.72rem; font-weight: 700; line-height: 1.3; cursor: pointer; transition: background 0.3s, color 0.3s; }
+  .pc-phases button[aria-pressed="true"] { background: #00856a; color: #fff; }
+  .pc-toggle { padding: 4px 12px; border: 1px solid #c9d1d4; border-radius: 4px; background: #fff; color: #222730; font: inherit; font-size: 0.75rem; cursor: pointer; }
+  .pc-controls button:focus-visible { outline: 2px solid #00856a; outline-offset: 2px; }
+
+  .pc-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 14px; font-size: 0.8rem; }
+  .pc-legend > span { display: flex; align-items: center; gap: 7px; }
+  .pc-chip-key { display: inline-block; width: 12px; height: 12px; border: 1px solid #c9d1d4; border-radius: 2px; background: #fff; }
+
+  .pc-context-row + .pc-context-row { margin-top: 14px; }
+  .pc-lane { display: flex; flex-wrap: wrap; row-gap: 8px; padding: 10px 4px 10px 10px; border-radius: 6px; background: #e8edeb; }
+  .pc-chip { display: grid; justify-items: center; gap: 1px; padding: 5px 9px; border: 1px solid #d9dfe1; border-radius: 5px; background: #fff; font-variant-numeric: tabular-nums; }
+  .pc-chip code { padding: 0; border: 0; background: none; }
+  .pc-chip small { color: #505a65; font-size: 0.66rem; }
+  .pc-lane .pc-chip { align-content: center; min-height: 46px; max-width: 12rem; margin-right: 6px; overflow: hidden; white-space: nowrap; transition: max-width 0.45s ease, padding 0.45s ease, margin 0.45s ease, border-width 0.45s ease, opacity 0.3s, background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s, transform 0.25s; }
+  .pc-lane .pc-chip[data-state~="hidden"] { max-width: 0; padding-inline: 0; margin-right: 0; border-width: 0; opacity: 0; }
+  :is(.pc-chip, .pc-chip-key)[data-state~="summary"] { border-color: #496a92; background: #e3eaf4; }
+  :is(.pc-chip, .pc-chip-key)[data-state~="cached"] { border-color: #00856a; background: #d5ebe5; }
+  :is(.pc-chip, .pc-chip-key)[data-state~="invalid"] { border-style: dashed; border-color: #9aa4ad; background: #fff; color: #8a96a0; }
+  :is(.pc-chip, .pc-chip-key)[data-state~="stale"] { border-color: #c46f2a; background: #f6e3d3; }
+  :is(.pc-chip, .pc-chip-key)[data-state~="selected"] { box-shadow: 0 0 0 2px #222730; }
+  .pc-lane .pc-chip[data-state~="selected"] { transform: translateY(-3px); }
+  .pc-status { min-height: 3em; margin: 10px 0 0; font-size: 0.85rem; }
+
+  .pc-archive { margin-top: 10px; }
+  .pc-archive-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+  .pc-archive-card { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 10px 12px; border: 1px solid #d9dfe1; border-left: 4px solid #496a92; border-radius: 6px; background: #eef2f7; transition: opacity 0.4s, transform 0.4s, visibility 0.4s; }
+  .pc-archive-card[data-state~="hidden"] { visibility: hidden; opacity: 0; transform: translateY(6px); }
+  .pc-archive-card > span:not(.pc-chip) { color: #505a65; font-size: 0.75rem; }
+  .pc-archive-tag { font-weight: 700; }
+  .pc-ref { margin-left: auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pc-lane .pc-chip, .pc-archive-card, .pc-phases button { transition: none; }
+  }
+
+  @media (max-width: 640px) {
+    .pc-comparison-grid { grid-template-columns: 1fr; }
+    .pc-flow { flex-direction: column; }
+    .pc-edge { flex: none; min-width: 0; padding: 6px 0; }
+    .pc-edge::after { content: '↓'; }
+  }
+</style>

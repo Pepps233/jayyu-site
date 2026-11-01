@@ -6,7 +6,8 @@ export default function rehypeBlogLinks() {
     const visit = (node) => {
       if (node.type === 'element' && node.tagName === 'a') {
         const href = node.properties?.href;
-        if (typeof href === 'string' && href) {
+        // Fragment links stay in-page so native anchor scrolling can handle them.
+        if (typeof href === 'string' && href && !href.startsWith('#')) {
           const url = new URL(href, 'https://jayyu.dev/');
           if (url.protocol === 'http:' || url.protocol === 'https:') {
             node.properties.target = '_blank';

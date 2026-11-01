@@ -25,7 +25,7 @@ translationKey: 'post3'
 核心思路是用两个较小的矩阵 **A** 和 **B** 表示权重更新。
 对于冻结的权重矩阵 W，适配后的权重为：
 
-<p>W′ = W + (α / r) BA</p>
+<p class="formula">W′ = W + (α / r) BA</p>
 
 其中，**r** 是 adapter 的秩，**α** 控制更新的缩放比例。
 训练时只更新 A 和 B。

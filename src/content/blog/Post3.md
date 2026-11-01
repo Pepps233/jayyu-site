@@ -25,7 +25,7 @@ This makes it possible to specialize a model without storing another complete co
 The central idea is to represent a weight update using two smaller matrices, **A** and **B**.
 For a frozen weight matrix W, the adapted weight is:
 
-<p>W′ = W + (α / r) BA</p>
+<p class="formula">W′ = W + (α / r) BA</p>
 
 Here, **r** is the adapter rank and **α** controls the update's scale.
 Only A and B are trained.
