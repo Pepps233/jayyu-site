@@ -1,0 +1,31 @@
+name: Fetch shared task context
+
+on:
+  push:
+    branches:
+      - site-updates-2026-06-23
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch shared conversation
+        run: |
+          curl --fail --location --retry 3 \
+            --user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/136 Safari/537.36" \
+            "https://chatgpt.com/s/cd_6a3b145e19a08191b18c1128aed74c15" \
+            --output shared-context.html
+          test -s shared-context.html
+      - name: Upload context artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-context
+          path: shared-context.html
+          if-no-files-found: error
+          retention-days: 1
