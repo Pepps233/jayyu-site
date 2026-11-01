@@ -6,6 +6,8 @@ import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 import rehypeBlogLinks from './src/lib/rehype-blog-links.mjs';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,7 +17,8 @@ export default defineConfig({
   },
   integrations: [mdx(), sitemap()],
   markdown: {
-    rehypePlugins: [rehypeBlogLinks],
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [rehypeKatex, rehypeBlogLinks],
     remarkRehype: {
       // Request text presentation so footnote arrows do not render as emoji.
       footnoteBackContent: '\u21A9\uFE0E',

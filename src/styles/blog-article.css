@@ -266,3 +266,10 @@
 .blog-article-page .article-prose p.formula {
   text-align: center;
 }
+
+/* KaTeX display math ($$ … $$): scroll wide equations instead of overflowing on phones. */
+.blog-article-page .article-prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25em 0;
+}

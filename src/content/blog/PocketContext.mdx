@@ -27,18 +27,24 @@ On SWE-bench Verified, ReAct led at 128K, but PCA led at 32K. PCA lost only **3.
 Before getting to Pocket Context, it helps to look at how other work handles memory in agentic workflows.
 The starting point is ReAct ([Yao et al., 2022](https://arxiv.org/abs/2210.03629))[^yao], which appends every reasoning step, tool call, and tool result back into the context window.
 
-Following the notation in ACM ([Li et al., 2026](https://arxiv.org/abs/2607.23809))[^li], let <em>s</em> be the system prompt and task, <em>a</em><sub><em>t</em></sub> the agent's action at turn <em>t</em> (reasoning plus tool calls), and <em>o</em><sub><em>t</em></sub> the tool result that comes back.
+Following the notation in ACM ([Li et al., 2026](https://arxiv.org/abs/2607.23809))[^li], let $s$ be the system prompt and task, $a_t$ the agent's action at turn $t$ (reasoning plus tool calls), and $o_t$ the tool result that comes back.
 The agent conditions on the full history:
 
-<p class="formula"><em>H</em><sub><em>t</em></sub> = &#123; <em>s</em>, (<em>a</em><sub>1</sub>, <em>o</em><sub>1</sub>), …, (<em>a</em><sub><em>t</em>−1</sub>, <em>o</em><sub><em>t</em>−1</sub>) &#125;</p>
+$$
+H_t = \{\, s,\ (a_1, o_1),\ \ldots,\ (a_{t-1}, o_{t-1}) \,\}
+$$
 
-<p class="formula"><em>a</em><sub><em>t</em></sub> ∼ <em>π</em><sub><em>θ</em></sub>(· | <em>H</em><sub><em>t</em></sub>), &nbsp;&nbsp; <em>o</em><sub><em>t</em></sub> ∼ <em>π</em><sub><em>γ</em></sub>(· | <em>H</em><sub><em>t</em></sub>; <em>a</em><sub><em>t</em></sub>)</p>
+$$
+a_t \sim \pi_\theta(\cdot \mid H_t), \qquad o_t \sim \pi_\gamma(\cdot \mid H_t;\, a_t)
+$$
 
-Here, <em>π</em><sub><em>θ</em></sub> is the agent model, and <em>π</em><sub><em>γ</em></sub> is whatever produces the tool result: a search engine for a search call, a sandbox for a bash command.
+Here, $\pi_\theta$ is the agent model, and $\pi_\gamma$ is whatever produces the tool result: a search engine for a search call, a sandbox for a bash command.
 
 Nothing in this loop ever removes a token:
 
-<p class="formula">|<em>H</em><sub><em>t</em>+1</sub>| = |<em>H</em><sub><em>t</em></sub>| + |<em>a</em><sub><em>t</em></sub>| + |<em>o</em><sub><em>t</em></sub>|</p>
+$$
+|H_{t+1}| = |H_t| + |a_t| + |o_t|
+$$
 
 So context grows with every turn, and a long enough task will fill any window.
 
@@ -52,21 +58,27 @@ Pocket Context shows that it doesn't: everything related to that file can safely
 ReSum ([Wu et al., 2025](https://arxiv.org/abs/2509.13313))[^wu] is a plug-and-play paradigm that **periodically** calls an external tool to condense the interaction history into a compact summary.
 The agent then continues from the summary and the original question, and the raw history is discarded:
 
-<p class="formula"><em>H</em><sub><em>t</em></sub> ← &#123; <em>s</em>, <em>σ</em><sub><em>t</em></sub> &#125;, &nbsp;&nbsp; where <em>σ</em><sub><em>t</em></sub> = Summ(<em>H</em><sub><em>t</em></sub>)</p>
+$$
+H_t \leftarrow \{\, s,\ \sigma_t \,\}, \qquad \text{where } \sigma_t = \operatorname{Summ}(H_t)
+$$
 
 ReSum works without training, and ReSum-GRPO additionally trains the agent to reason over its own summaries.
 
 Agent Context Optimization (ACON, [Kang et al., 2025](https://arxiv.org/abs/2510.00615))[^kang] compresses two things, each with its own threshold.
-History compression rewrites the interaction history <em>h</em><sub><em>t</em></sub> once it grows past <em>T</em><sub>hist</sub>:
+History compression rewrites the interaction history $h_t$ once it grows past $T_{\text{hist}}$:
 
-<p class="formula"><em>h</em>′<sub><em>t</em></sub> = <em>f</em>(<em>h</em><sub><em>t</em></sub>; <em>φ</em>, 𝒫<sub>hist</sub>) &nbsp;&nbsp;if |<em>h</em><sub><em>t</em></sub>| &gt; <em>T</em><sub>hist</sub>, &nbsp;&nbsp;otherwise <em>h</em><sub><em>t</em></sub></p>
+$$
+h'_t = \begin{cases} f(h_t;\, \phi, \mathcal{P}_{\text{hist}}) & \text{if } |h_t| > T_{\text{hist}}, \\ h_t & \text{otherwise.} \end{cases}
+$$
 
 Observation compression handles a single long tool result.
-Given an action <em>a</em>, the environment returns an observation <em>o</em> according to the transition function 𝒯(<em>s</em>, <em>a</em>) → (<em>s</em>′, <em>o</em>), and ACON compresses <em>o</em><sub><em>t</em></sub> when it exceeds <em>T</em><sub>obs</sub>:
+Given an action $a$, the environment returns an observation $o$ according to the transition function $\mathcal{T}(s, a) \to (s', o)$, and ACON compresses $o_t$ when it exceeds $T_{\text{obs}}$:
 
-<p class="formula"><em>o</em>′<sub><em>t</em></sub> = <em>f</em>(<em>o</em><sub><em>t</em></sub>, <em>h</em><sub><em>t</em>−1</sub>; <em>φ</em>, 𝒫<sub>obs</sub>) &nbsp;&nbsp;if |<em>o</em><sub><em>t</em></sub>| &gt; <em>T</em><sub>obs</sub>, &nbsp;&nbsp;otherwise <em>o</em><sub><em>t</em></sub></p>
+$$
+o'_t = \begin{cases} f(o_t, h_{t-1};\, \phi, \mathcal{P}_{\text{obs}}) & \text{if } |o_t| > T_{\text{obs}}, \\ o_t & \text{otherwise.} \end{cases}
+$$
 
-Instead of hand-written rules or weight updates, ACON optimizes the compression guideline 𝒫 directly in natural language.
+Instead of hand-written rules or weight updates, ACON optimizes the compression guideline $\mathcal{P}$ directly in natural language.
 It collects tasks where the agent succeeds with full context but fails with compressed context, asks an LLM what the compressed version lost, and rewrites the guideline from that feedback.
 
 Both methods, however, have one thing in common: once the history is summarized, the original is gone.
@@ -162,13 +174,15 @@ A standard language model only appends to its context, while a CLM rewrites its 
 
 CLMs implement this by outputting the live context into a file the model edits with bash commands, with each edit synced back into what the model sees on its next turn.
 PC is narrower.
-The agent selects a contiguous range of complete exchanges, from <em>i</em> to <em>j</em>, and hands the compaction job to a separate compressor agent running the same model:
+The agent selects a contiguous range of complete exchanges, from $i$ to $j$, and hands the compaction job to a separate compressor agent running the same model:
 
-<p class="formula"><em>H</em>′ = <em>H</em><sub>&lt;<em>i</em></sub> ⊕ <em>σ</em><sub><em>k</em></sub> ⊕ <em>H</em><sub>&gt;<em>j</em></sub>, &nbsp;&nbsp; <em>σ</em><sub><em>k</em></sub> = <em>C</em><sub><em>θ</em></sub>(<em>H</em><sub>≤<em>j</em></sub>)</p>
+$$
+H' = H_{<i} \oplus \sigma_k \oplus H_{>j}, \qquad \sigma_k = C_\theta(H_{\le j})
+$$
 
-The new history <em>H</em>′ joins (⊕) the messages before <em>i</em>, a summary <em>σ</em><sub><em>k</em></sub>, and the messages after <em>j</em>.
-The compressor <em>C</em><sub><em>θ</em></sub> writes that summary using the history through <em>j</em>, so earlier messages provide context but nothing after <em>j</em> is visible to it.
-Only exchanges <em>i</em> through <em>j</em> are replaced; their original messages are archived under tag <em>k</em>.
+The new history $H'$ joins ($\oplus$) the messages before $i$, a summary $\sigma_k$, and the messages after $j$.
+The compressor $C_\theta$ writes that summary using the history through $j$, so earlier messages provide context but nothing after $j$ is visible to it.
+Only exchanges $i$ through $j$ are replaced; their original messages are archived under tag $k$.
 
 ### Compacting and expanding blocks
 
@@ -202,9 +216,11 @@ It records exactly which archived messages it reused, here `b002` and `b003` fro
 
 Compaction has a cost: it invalidates part of the KV cache.
 Serving engines cache the keys and values computed for a prompt and reuse them for the next request, but only up to the first token that changed.
-Each token's keys and values depend on every token before it and on its position, so an edit at position <em>p</em> invalidates the cache for everything after it:
+Each token's keys and values depend on every token before it and on its position, so an edit at position $p$ invalidates the cache for everything after it:
 
-<p class="formula">tokens to re-prefill = |<em>H</em>′| − <em>p</em></p>
+$$
+\text{tokens to re-prefill} = |H'| - p
+$$
 
 Expanding a block is cheap, since it only appends to the end.
 Compacting is not.
