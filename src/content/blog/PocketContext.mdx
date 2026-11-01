@@ -27,18 +27,18 @@ On SWE-bench Verified, ReAct led at 128K, but PCA led at 32K. PCA lost only **3.
 Before getting to Pocket Context, it helps to look at how other work handles memory in agentic workflows.
 The starting point is ReAct ([Yao et al., 2022](https://arxiv.org/abs/2210.03629))[^yao], which appends every reasoning step, tool call, and tool result back into the context window.
 
-Following the notation in ACM ([Li et al., 2026](https://arxiv.org/abs/2607.23809))[^li], let s be the system prompt and task, a<sub>t</sub> the agent's action at turn t (reasoning plus tool calls), and o<sub>t</sub> the tool result that comes back.
+Following the notation in ACM ([Li et al., 2026](https://arxiv.org/abs/2607.23809))[^li], let <strong>s</strong> be the system prompt and task, <strong>a<sub>t</sub></strong> the agent's action at turn <strong>t</strong> (reasoning plus tool calls), and <strong>o<sub>t</sub></strong> the tool result that comes back.
 The agent conditions on the full history:
 
-<p class="formula">H<sub>t</sub> = &#123; s, (a<sub>1</sub>, o<sub>1</sub>), …, (a<sub>t−1</sub>, o<sub>t−1</sub>) &#125;</p>
+<p class="formula"><strong>H<sub>t</sub> = &#123; s, (a<sub>1</sub>, o<sub>1</sub>), …, (a<sub>t−1</sub>, o<sub>t−1</sub>) &#125;</strong></p>
 
-<p class="formula">a<sub>t</sub> ~ π<sub>θ</sub>(· | H<sub>t</sub>), &nbsp;&nbsp; o<sub>t</sub> ~ π<sub>γ</sub>(· | H<sub>t</sub>; a<sub>t</sub>)</p>
+<p class="formula"><strong>a<sub>t</sub> ~ π<sub>θ</sub>(· | H<sub>t</sub>), &nbsp;&nbsp; o<sub>t</sub> ~ π<sub>γ</sub>(· | H<sub>t</sub>; a<sub>t</sub>)</strong></p>
 
-Here, π<sub>θ</sub> is the agent model, and π<sub>γ</sub> is whatever produces the tool result: a search engine for a search call, a sandbox for a bash command.
+Here, <strong>π<sub>θ</sub></strong> is the agent model, and <strong>π<sub>γ</sub></strong> is whatever produces the tool result: a search engine for a search call, a sandbox for a bash command.
 
 Nothing in this loop ever removes a token:
 
-<p class="formula">|H<sub>t+1</sub>| = |H<sub>t</sub>| + |a<sub>t</sub>| + |o<sub>t</sub>|</p>
+<p class="formula"><strong>|H<sub>t+1</sub>| = |H<sub>t</sub>| + |a<sub>t</sub>| + |o<sub>t</sub>|</strong></p>
 
 So context grows with every turn, and a long enough task will fill any window.
 
@@ -52,21 +52,21 @@ Pocket Context shows that it doesn't: everything related to that file can safely
 ReSum ([Wu et al., 2025](https://arxiv.org/abs/2509.13313))[^wu] is a plug-and-play paradigm that **periodically** calls an external tool to condense the interaction history into a compact summary.
 The agent then continues from the summary and the original question, and the raw history is discarded:
 
-<p class="formula">H<sub>t</sub> ← &#123; s, σ<sub>t</sub> &#125;, &nbsp;&nbsp; where σ<sub>t</sub> = Summ(H<sub>t</sub>)</p>
+<p class="formula"><strong>H<sub>t</sub> ← &#123; s, σ<sub>t</sub> &#125;, &nbsp;&nbsp; where σ<sub>t</sub> = Summ(H<sub>t</sub>)</strong></p>
 
 ReSum works without training, and ReSum-GRPO additionally trains the agent to reason over its own summaries.
 
 Agent Context Optimization (ACON, [Kang et al., 2025](https://arxiv.org/abs/2510.00615))[^kang] compresses two things, each with its own threshold.
-History compression rewrites the interaction history h<sub>t</sub> once it grows past T<sub>hist</sub>:
+History compression rewrites the interaction history <strong>h<sub>t</sub></strong> once it grows past <strong>T<sub>hist</sub></strong>:
 
-<p class="formula">h′<sub>t</sub> = f(h<sub>t</sub>; φ, 𝒫<sub>hist</sub>) if |h<sub>t</sub>| &gt; T<sub>hist</sub>, otherwise h<sub>t</sub></p>
+<p class="formula"><strong>h′<sub>t</sub> = f(h<sub>t</sub>; φ, 𝒫<sub>hist</sub>) if |h<sub>t</sub>| &gt; T<sub>hist</sub>, otherwise h<sub>t</sub></strong></p>
 
 Observation compression handles a single long tool result.
-Given an action a, the environment returns an observation o according to the transition function 𝒯(s, a) → (s′, o), and ACON compresses o<sub>t</sub> when it exceeds T<sub>obs</sub>:
+Given an action <strong>a</strong>, the environment returns an observation <strong>o</strong> according to the transition function <strong>𝒯(s, a) → (s′, o)</strong>, and ACON compresses <strong>o<sub>t</sub></strong> when it exceeds <strong>T<sub>obs</sub></strong>:
 
-<p class="formula">o′<sub>t</sub> = f(o<sub>t</sub>, h<sub>t−1</sub>; φ, 𝒫<sub>obs</sub>) if |o<sub>t</sub>| &gt; T<sub>obs</sub>, otherwise o<sub>t</sub></p>
+<p class="formula"><strong>o′<sub>t</sub> = f(o<sub>t</sub>, h<sub>t−1</sub>; φ, 𝒫<sub>obs</sub>) if |o<sub>t</sub>| &gt; T<sub>obs</sub>, otherwise o<sub>t</sub></strong></p>
 
-Instead of hand-written rules or weight updates, ACON optimizes the compression guideline 𝒫 directly in natural language.
+Instead of hand-written rules or weight updates, ACON optimizes the compression guideline <strong>𝒫</strong> directly in natural language.
 It collects tasks where the agent succeeds with full context but fails with compressed context, asks an LLM what the compressed version lost, and rewrites the guideline from that feedback.
 
 Both methods, however, have one thing in common: once the history is summarized, the original is gone.
@@ -162,13 +162,13 @@ A standard language model only appends to its context, while a CLM rewrites its 
 
 CLMs implement this by outputting the live context into a file the model edits with bash commands, with each edit synced back into what the model sees on its next turn.
 PC is narrower.
-The agent selects a contiguous range of complete exchanges, from i to j, and hands the compaction job to a separate compressor agent running the same model:
+The agent selects a contiguous range of complete exchanges, from <strong>i</strong> to <strong>j</strong>, and hands the compaction job to a separate compressor agent running the same model:
 
-<p class="formula">H′ = H<sub>&lt;i</sub> ⊕ σ<sub>k</sub> ⊕ H<sub>&gt;j</sub>, &nbsp;&nbsp; σ<sub>k</sub> = C<sub>θ</sub>(H<sub>≤j</sub>)</p>
+<p class="formula"><strong>H′ = H<sub>&lt;i</sub> ⊕ σ<sub>k</sub> ⊕ H<sub>&gt;j</sub>, &nbsp;&nbsp; σ<sub>k</sub> = C<sub>θ</sub>(H<sub>≤j</sub>)</strong></p>
 
-The new history H′ joins (⊕) the messages before i, a summary σ<sub>k</sub>, and the messages after j.
-The compressor C<sub>θ</sub> writes that summary using the history through j, so earlier messages provide context but nothing after j is visible to it.
-Only exchanges i through j are replaced; their original messages are archived under tag k.
+The new history <strong>H′</strong> joins (<strong>⊕</strong>) the messages before <strong>i</strong>, a summary <strong>σ<sub>k</sub></strong>, and the messages after <strong>j</strong>.
+The compressor <strong>C<sub>θ</sub></strong> writes that summary using the history through <strong>j</strong>, so earlier messages provide context but nothing after <strong>j</strong> is visible to it.
+Only exchanges <strong>i</strong> through <strong>j</strong> are replaced; their original messages are archived under tag <strong>k</strong>.
 
 ### Compacting and expanding blocks
 
@@ -202,9 +202,9 @@ It records exactly which archived messages it reused, here `b002` and `b003` fro
 
 Compaction has a cost: it invalidates part of the KV cache.
 Serving engines cache the keys and values computed for a prompt and reuse them for the next request, but only up to the first token that changed.
-Each token's keys and values depend on every token before it and on its position, so an edit at position p invalidates the cache for everything after it:
+Each token's keys and values depend on every token before it and on its position, so an edit at position <strong>p</strong> invalidates the cache for everything after it:
 
-<p class="formula">tokens to re-prefill = |H′| − p</p>
+<p class="formula"><strong>tokens to re-prefill = |H′| − p</strong></p>
 
 Expanding a block is cheap, since it only appends to the end.
 Compacting is not.
