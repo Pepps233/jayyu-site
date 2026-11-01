@@ -29,48 +29,6 @@ const currentlyItems = [
   showFooter={false}
 >
   <Fragment slot="head">
-    <link rel="preload" as="image" href="/images/ascii-magic-4-poster.jpg" type="image/jpeg" fetchpriority="high" />
-    <link rel="preload" as="video" href="/videos/ascii-magic-4.mp4" type="video/mp4" />
-    <style is:inline>
-      html.landing-bg-pending .landing-home h1,
-      html.landing-bg-pending .landing-name,
-      html.landing-bg-pending .landing-links a,
-      html.landing-bg-pending .landing-currently p {
-        opacity: 0;
-        transform: translateY(14px);
-        filter: blur(4px);
-        animation: none;
-      }
-    </style>
-    <script is:inline>
-      (() => {
-        const root = document.documentElement;
-        const reveal = () => {
-          root.classList.remove('landing-bg-pending');
-          root.classList.add('landing-bg-loaded');
-        };
-
-        root.classList.add('landing-bg-pending');
-
-        const poster = new Image();
-        poster.decoding = 'async';
-        poster.fetchPriority = 'high';
-        poster.onload = () => {
-          if (typeof poster.decode === 'function') {
-            poster.decode().then(reveal, reveal);
-            return;
-          }
-
-          reveal();
-        };
-        poster.onerror = reveal;
-        poster.src = '/images/ascii-magic-4-poster.jpg';
-
-        if (poster.complete) {
-          poster.onload();
-        }
-      })();
-    </script>
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Person',
@@ -83,19 +41,6 @@ const currentlyItems = [
       ],
     })} />
   </Fragment>
-
-  <video
-    class="landing-bg-video"
-    autoplay
-    loop
-    muted
-    playsinline
-    preload="auto"
-    poster="/images/ascii-magic-4-poster.jpg"
-    aria-hidden="true"
-  >
-    <source src="/videos/ascii-magic-4.mp4" type="video/mp4" />
-  </video>
 
   <section class="landing-home" aria-labelledby="home-title">
     <h1 id="home-title">Hello</h1>

@@ -26,26 +26,7 @@
   padding: clamp(48px, 8vw, 96px) 0;
   overflow: hidden;
   isolation: isolate;
-  background: var(--color-bg-primary);
-}
-
-.landing-main::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(247, 248, 250, 0.74) 0%, rgba(247, 248, 250, 0.42) 42%, rgba(247, 248, 250, 0.2) 100%);
-}
-
-.landing-bg-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  pointer-events: none;
+  background: #F1EEEE;
 }
 
 .landing-home {
