@@ -1,0 +1,263 @@
+---
+title: 'Pocket Context: Agent-Controlled Compaction with Lossless Recall for Long-Horizon Tasks'
+description: 'A context-management method in which the agent chooses which parts of its history to compact, archives the originals, and expands them word for word when it needs them again'
+pubDate: 'Oct 31 2026'
+heroImage: '../../assets/images/pocket-context-hero.png'
+tags: ['AI', 'LLM', 'Agents', 'Context Management']
+language: 'en'
+defaultLanguage: 'en'
+translationKey: 'pocket-context'
+repositoryUrl: 'https://github.com/Pepps233/pocket-context'
+repositoryNote: 'The repository includes the source code, the PCA CLI tool, a Python library for building your own Pocket Context agent, and the benchmark cases used in the experiments.'
+---
+
+import PocketContextDiagram from '../../components/blog/PocketContextDiagram.astro';
+import CitationBlock from '../../components/blog/CitationBlock.astro';
+
+Context management trades off the detail an agent can recall directly against how much of its history fits in a fixed context window. As tasks grow more complex, fitting more history becomes increasingly important, but the next step may depend on a detail the summary left out.
+
+Pocket Context lets the agent choose which parts of its history to compact and when. A separate compressor replaces the selected exchanges with a tagged summary and archives the originals. The agent keeps working with the shorter context and can bring back the original messages in full whenever it needs more detail.
+
+Pocket Context Agent (PCA) reached **80.67%** accuracy, compared with **68.00%** for ReAct, **72.67%** for ReSum, and **80.67%** for ACM under the same model and evaluation settings.
+Its mean per-task peak input was **61.98K tokens**, versus **71.59K** for ReAct, **70.37K** for ReSum, and **65.28K** for ACM.
+On SWE-bench Verified, ReAct led at 128K, but PCA led at 32K. PCA lost only **3.2 percentage points** as the window shrank, versus **12.8** for ReAct, suggesting greater robustness under context pressure.
+
+## Why context keeps growing
+
+Before getting to Pocket Context, it helps to look at how other work handles memory in agentic workflows.
+The starting point is ReAct ([Yao et al., 2022](https://arxiv.org/abs/2210.03629))[^yao], which appends every reasoning step, tool call, and tool result back into the context window.
+
+Following the notation in ACM ([Li et al., 2026](https://arxiv.org/abs/2607.23809))[^li], let s be the system prompt and task, a<sub>t</sub> the agent's action at turn t (reasoning plus tool calls), and o<sub>t</sub> the tool result that comes back.
+The agent conditions on the full history:
+
+<p class="formula">H<sub>t</sub> = &#123; s, (a<sub>1</sub>, o<sub>1</sub>), …, (a<sub>t−1</sub>, o<sub>t−1</sub>) &#125;</p>
+
+<p class="formula">a<sub>t</sub> ~ π<sub>θ</sub>(· | H<sub>t</sub>), &nbsp;&nbsp; o<sub>t</sub> ~ π<sub>γ</sub>(· | H<sub>t</sub>; a<sub>t</sub>)</p>
+
+Here, π<sub>θ</sub> is the agent model, and π<sub>γ</sub> is whatever produces the tool result: a search engine for a search call, a sandbox for a bash command.
+
+Nothing in this loop ever removes a token:
+
+<p class="formula">|H<sub>t+1</sub>| = |H<sub>t</sub>| + |a<sub>t</sub>| + |o<sub>t</sub>|</p>
+
+So context grows with every turn, and a long enough task will fill any window.
+
+But does every piece need to stay?
+Consider a task that takes many reasoning steps.
+Once the agent has read a file and finished reasoning about it, does it still need the whole file for the steps that follow?
+Pocket Context shows that it doesn't: everything related to that file can safely be compacted into a memory block and archived until it's needed again.
+
+## Summarizing the history (Prior work)
+
+ReSum ([Wu et al., 2025](https://arxiv.org/abs/2509.13313))[^wu] is a plug-and-play paradigm that **periodically** calls an external tool to condense the interaction history into a compact summary.
+The agent then continues from the summary and the original question, and the raw history is discarded:
+
+<p class="formula">H<sub>t</sub> ← &#123; s, σ<sub>t</sub> &#125;, &nbsp;&nbsp; where σ<sub>t</sub> = Summ(H<sub>t</sub>)</p>
+
+ReSum works without training, and ReSum-GRPO additionally trains the agent to reason over its own summaries.
+
+Agent Context Optimization (ACON, [Kang et al., 2025](https://arxiv.org/abs/2510.00615))[^kang] compresses two things, each with its own threshold.
+History compression rewrites the interaction history h<sub>t</sub> once it grows past T<sub>hist</sub>:
+
+<p class="formula">h′<sub>t</sub> = f(h<sub>t</sub>; φ, 𝒫<sub>hist</sub>) if |h<sub>t</sub>| &gt; T<sub>hist</sub>, otherwise h<sub>t</sub></p>
+
+Observation compression handles a single long tool result.
+Given an action a, the environment returns an observation o according to the transition function 𝒯(s, a) → (s′, o), and ACON compresses o<sub>t</sub> when it exceeds T<sub>obs</sub>:
+
+<p class="formula">o′<sub>t</sub> = f(o<sub>t</sub>, h<sub>t−1</sub>; φ, 𝒫<sub>obs</sub>) if |o<sub>t</sub>| &gt; T<sub>obs</sub>, otherwise o<sub>t</sub></p>
+
+Instead of hand-written rules or weight updates, ACON optimizes the compression guideline 𝒫 directly in natural language.
+It collects tasks where the agent succeeds with full context but fails with compressed context, asks an LLM what the compressed version lost, and rewrites the guideline from that feedback.
+
+Both methods, however, have one thing in common: once the history is summarized, the original is gone.
+
+## Splitting the work across roles (More prior work)
+
+COMPASS ([Wan et al., 2025](https://arxiv.org/abs/2510.08790))[^wan], ACE ([Zhang et al., 2026](https://arxiv.org/abs/2510.04618))[^zhang], and ACM ([Li et al., 2026](https://arxiv.org/abs/2607.23809)) all move context work out of the main agent's own reasoning.
+
+### COMPASS
+
+COMPASS has three agents.
+The main agent runs an ordinary ReAct loop.
+A meta-thinker watches the main agent's trace asynchronously, looking for loops, tool misuse, or signs that the task is done, and interrupts with a decision: continue, pivot, verify, or stop.
+After each interruption, a context manager combines the task, current trace, decision, and saved notes into a fresh, compact brief.
+It also updates the notes for future rounds, while the main agent restarts from the brief alone.
+
+### ACE
+
+ACE splits context work into three roles: a generator that attempts the task, a reflector that pulls lessons out of what worked and what failed, and a curator that merges those lessons into a structured playbook (essentially a file of bullet-point notes containing reusable strategies) through small, incremental updates.
+Unlike COMPASS and ACM, ACE evolves its playbook across tasks rather than compressing the working context inside a single task.
+
+### ACM
+
+ACM keeps a single agent but gives it two tools, each backed by its own LLM call.
+`manage_context` sends every message since the previous compaction to a summarizer, replaces those messages with a summary tagged with an ID, and archives the raw messages on disk.
+`query_memory` sends the agent's query and the selected archive to a querier, which summarizes the relevant findings.
+The agent decides when to compact, but not which messages to include.
+Storage is lossless, but recall returns an LLM summary rather than the original messages.
+
+<PocketContextDiagram kind="comparison" />
+
+<div class="pc-benchmark-table">
+
+| Method | BrowseComp-Plus pass@1 (128K) | SWE-bench Verified pass@1 (128K) |
+| --- | ---: | ---: |
+| **ReAct** | 68.00% | **84.00%** |
+| ACM | 80.67% | 83.20% |
+| ReSum | 72.67% | 80.80% |
+| **PCA (ours)** | **80.67%** | 80.80% |
+
+</div>
+
+**SWE-bench Verified one-pass accuracy by context limit**
+
+<div class="pc-benchmark-table">
+
+| Method | 32K | 64K | 128K | Δ (128K − 32K) |
+| --- | ---: | ---: | ---: | ---: |
+| **ReAct** | 71.20% | **83.20%** | **84.00%** | 12.80 pp |
+| ACM | 72.80% | 79.20% | 83.20% | 10.40 pp |
+| ReSum | 75.20% | 81.60% | 80.80% | 5.60 pp |
+| **PCA (ours)** | **77.60%** | 80.80% | 80.80% | **3.20 pp** |
+
+</div>
+
+Across the 125-task SWE-bench Verified run at 128K, ReAct averaged **37,842 peak input tokens per task**, with the highest task reaching **120,985 tokens**.
+ReAct performed best at this budget, consistent with the benefit of retaining the full history when it fits in context.
+
+A 32K window puts more pressure on context management: it is below ReAct's mean peak input in the 128K run, though context needs vary by task.
+Reducing the window from 128K to 32K lowered PCA's accuracy by just **3.2 percentage points**, compared with **12.8 points** for ReAct.
+PCA also achieved the highest accuracy at 32K, suggesting greater robustness under context pressure while staying close to its own 128K result.
+*The Δ column reports these accuracy drops in percentage points (pp).*
+
+Evaluation is limited to 150 BrowseComp-Plus tasks and the same 125 SWE-bench Verified tasks for each method.
+See [Benchmark selection](#benchmark-selection) for details.
+
+## Managing the KV cache directly
+
+Other approaches skip the text and work on the KV cache built up during the agent's reasoning.
+SideQuest ([Kariyappa and Suh, 2026](https://arxiv.org/abs/2602.22603))[^kariyappa] has the model reason about which tokens in its context are still useful and evict the rest, running this as a side quest in parallel so the cleanup itself doesn't bloat the main reasoning.
+It's sort of like a garbage collection system for the model's own memory.
+These methods are discussed only briefly here, since the focus is context management for proprietary models and for small, relatively easy-to-fine-tune models such as Qwen3.5-9B.
+
+## Pocket Context
+
+Pocket Context (PC) is the general method for context management in long-horizon agents.
+Pocket Context Agent (PCA) implements PC and serves as the harness for every experiment.
+
+The prior work above, along with earlier approaches to long-horizon context management at Diffex AI, points to the same idea: context management benefits from a division of labor.
+The main agent can use the context tools as a black box instead of polluting its own context by writing a summary of its previous work.
+A separate compressor also gets a more complete view of the accumulated context and keeps the signal from the current observation apart from earlier ones.
+
+The design of PC follows three principles:
+
+1. Memory storage and retrieval must both be lossless.
+2. The agent decides when to manage its context.
+3. The agent decides which part of its context to manage.
+
+Principle 3 shares its motivation with Context Language Models ([Shao et al., 2026](https://arxiv.org/abs/2609.37725))[^shao].
+A standard language model only appends to its context, while a CLM rewrites its context however it likes:
+
+<PocketContextDiagram kind="clm" />
+
+CLMs implement this by outputting the live context into a file the model edits with bash commands, with each edit synced back into what the model sees on its next turn.
+PC is narrower.
+The agent selects a contiguous range of complete exchanges, from i to j, and hands the compaction job to a separate compressor agent running the same model:
+
+<p class="formula">H′ = H<sub>&lt;i</sub> ⊕ σ<sub>k</sub> ⊕ H<sub>&gt;j</sub>, &nbsp;&nbsp; σ<sub>k</sub> = C<sub>θ</sub>(H<sub>≤j</sub>)</p>
+
+The new history H′ joins (⊕) the messages before i, a summary σ<sub>k</sub>, and the messages after j.
+The compressor C<sub>θ</sub> writes that summary using the history through j, so earlier messages provide context but nothing after j is visible to it.
+Only exchanges i through j are replaced; their original messages are archived under tag k.
+
+### Compacting and expanding blocks
+
+PC gives the agent two context tools: `compact_block` and `expand_block`.
+`compact_block` selects a range of context blocks to summarize and hands the summarization to a separate compressor agent.
+The compressor is deliberately thin: one model call with no tools, which reads the history and returns only the replacement summary.
+`expand_block` restores a compacted block by appending its archived messages, word for word, to the end of the context window.
+
+Before every request, the agent receives a catalog of the blocks it is allowed to compact, each labeled with an ID such as `b001`.
+Each block covers one complete exchange (the reasoning, every tool call, and every result) or one memory, so a selection can never separate a tool call from its result.
+The instructions, the latest user request, and the latest exchange are protected and not listed.
+Every compacted block receives a tag such as `ctx-0001`, which is what the agent passes to `expand_block`.
+
+Tags can also reference other tags.
+Consider blocks `b001` through `b010`.
+Compacting `b001`–`b003` replaces them with a summary tagged `ctx-0001`, and that summary becomes a block of its own, `b011`.
+If the agent later compacts `b011` together with `b004`–`b005`, the new summary is tagged `ctx-0002 refs=ctx-0001`:
+
+<PocketContextDiagram kind="blocks" />
+
+The archive for `ctx-0002` stores only `b004`–`b005`, the messages it owns, and records `ctx-0001` as a reference instead of copying it.
+Expanding `ctx-0002` returns those two blocks and lists `ctx-0001` without expanding it, so the agent knows where to look if it needs the earlier details.
+References come from what was actually selected, never from what the summary text happens to mention.
+
+Overlap works the same way.
+Suppose the agent expands `ctx-0001`: copies of `b002` and `b003` are appended to the end of the context with fresh block IDs, and the agent keeps working.
+If it then compacts those copies together with its newer messages, the compressor summarizes everything selected, but the new archive stores only the newer messages.
+It records exactly which archived messages it reused, here `b002` and `b003` from `ctx-0001`, so the original exchange is stored once and never duplicated.
+
+## The cost of rewriting history
+
+Compaction has a cost: it invalidates part of the KV cache.
+Serving engines cache the keys and values computed for a prompt and reuse them for the next request, but only up to the first token that changed.
+Each token's keys and values depend on every token before it and on its position, so an edit at position p invalidates the cache for everything after it:
+
+<p class="formula">tokens to re-prefill = |H′| − p</p>
+
+Expanding a block is cheap, since it only appends to the end.
+Compacting is not.
+In the worst case, the agent keeps compacting the blocks closest to the beginning of the context, and every compaction forces the engine to recompute almost the entire window:
+
+<PocketContextDiagram kind="kv" />
+
+There are ways around it.
+Suffix Cache Reuse (SCR), proposed alongside CLMs ([Shao et al., 2026](https://arxiv.org/abs/2609.37725)), keeps the cached keys and values of the tokens that survive an edit, shifts their positional encodings to their new positions, and recomputes only the newly inserted text.
+SCR is a change to the serving engine, so it requires a self-hosted model; proprietary APIs only reuse matching prefixes, and a compaction simply leads to a cache miss.
+
+## Benchmark selection
+
+The 150 BrowseComp-Plus tasks are the same ones used in the ACM paper, which reports results for ReSum, ReAct, and ACM. This provides a reference for comparison when the model and evaluation settings match.
+The 125 SWE-Bench Verified tasks are randomly selected to evaluate the methods on longer-running coding tasks.
+All methods use the same context limit, allowing us to compare context management across web research and software engineering.
+BrowseComp-Plus responses were graded with GPT-6 Luna instead of Qwen3-32B, the judge required for new official leaderboard submissions.
+SWE-bench Verified patches were graded with the official [test-based evaluation harness](https://github.com/SWE-bench/SWE-bench) on Daytona. 
+
+## Future work
+
+PC is designed to work across models, including proprietary ones, without changing their weights. Post-training models to use its context tools more effectively is a natural next step.
+Informal observations during these experiments suggest that larger models call PC's context tools more often than smaller models. Post-training smaller models could help them learn when to manage their context, though more frequent tool use alone does not imply better performance.
+
+## Citation
+
+If you need to cite Pocket Context:
+
+<CitationBlock
+  citationKey="yu2026pocketcontext"
+  fields={[
+    ['title', 'Pocket Context: Agent-Controlled Compaction with Lossless Recall for Long-Horizon Tasks'],
+    ['author', 'Yu, Jay'],
+    ['year', '2026'],
+    ['month', 'October'],
+    ['url', 'https://jayyu.dev/blog/pocket-context/'],
+  ]}
+/>
+
+[^chen]: Chen, Z., Ma, X., Zhuang, S., et al. (2025). BrowseComp-Plus: A more fair and transparent evaluation benchmark of deep-research agent. arXiv. https://arxiv.org/abs/2508.06600
+
+[^yao]: Yao, S., Zhao, J., Yu, D., et al. (2022). ReAct: Synergizing reasoning and acting in language models. arXiv. https://arxiv.org/abs/2210.03629
+
+[^li]: Li, X., Ming, R., Chu, M., Shao, S., Jin, R., & Xiong, C. (2026). ACM: Agentic context management for long horizon tasks. arXiv. https://arxiv.org/abs/2607.23809
+
+[^wu]: Wu, X., Li, K., Zhao, Y., et al. (2025). ReSum: Unlocking long-horizon search intelligence via context summarization. arXiv. https://arxiv.org/abs/2509.13313
+
+[^kang]: Kang, M., Chen, W.-N., Han, D., et al. (2025). ACON: Optimizing context compression for long-horizon LLM agents. arXiv. https://arxiv.org/abs/2510.00615
+
+[^wan]: Wan, G., Ling, M., Ren, X., Han, R., Li, S., & Zhang, Z. (2025). COMPASS: Enhancing agent long-horizon reasoning with evolving context. arXiv. https://arxiv.org/abs/2510.08790
+
+[^zhang]: Zhang, Q., Hu, C., Upasani, S., et al. (2026). Agentic context engineering: Evolving contexts for self-improving language models. arXiv. https://arxiv.org/abs/2510.04618
+
+[^kariyappa]: Kariyappa, S., & Suh, G. E. (2026). SideQuest: Model-driven KV cache management for long-horizon agentic reasoning. arXiv. https://arxiv.org/abs/2602.22603
+
+[^shao]: Shao, R., Shen, S. Z., Yin, J. O., et al. (2026). Context language models. arXiv. https://arxiv.org/abs/2609.37725

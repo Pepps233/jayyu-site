@@ -19,6 +19,8 @@ const blog = defineCollection({
             category: z.string().optional(),
             section: z.enum(['research', 'life']).optional(),
 			author: z.string().optional(),
+			repositoryUrl: z.string().url().optional(),
+			repositoryNote: z.string().optional(),
 			pinned: z.boolean().default(false),
 			language: blogLanguage.default('en'),
 			defaultLanguage: blogLanguage.default('en'),

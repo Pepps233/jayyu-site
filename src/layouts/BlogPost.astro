@@ -1,6 +1,7 @@
 ---
 import SiteShell from '../components/SiteShell.astro';
 import FormattedDate from '../components/FormattedDate.astro';
+import githubLogo from '../assets/logos/github-invertocat-black.svg';
 import '../styles/blog-article.css';
 import PostNav from '../components/ui/nav/PostNav.astro';
 import { slugifyTag } from '../lib/slug';
@@ -30,6 +31,8 @@ const {
   pubDate,
   updatedDate,
   heroImage,
+  repositoryUrl,
+  repositoryNote,
 } = defaultPost.data;
 const tags = Array.isArray(defaultPost.data.tags) ? defaultPost.data.tags : [];
 const authorName = defaultPost.data.author || 'Jay Yu';
@@ -114,6 +117,21 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
             ))}
           </h1>
           <a class="article-byline no-underline" href={`/blog/author/${slugifyTag(authorName)}/`}>{authorName}</a>
+          {repositoryUrl && (
+            <a
+              class="article-repository no-underline"
+              href={repositoryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View project repository on GitHub (opens in a new tab)"
+              title="View project repository on GitHub"
+            >
+              <img src={githubLogo.src} width="24" height="24" alt="" />
+            </a>
+          )}
+          {repositoryUrl && repositoryNote && (
+            <p class="article-repository-note"><em>{repositoryNote}</em></p>
+          )}
         </div>
       </header>
     )}

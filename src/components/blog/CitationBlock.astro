@@ -1,0 +1,169 @@
+---
+interface Props {
+  citationKey: string;
+  entryType?: string;
+  fields: [name: string, value: string][];
+}
+
+const { citationKey, entryType = 'article', fields } = Astro.props;
+const width = Math.max(...fields.map(([name]) => name.length));
+const lines = fields.map(([name, value], index) => ({
+  name,
+  pad: ' '.repeat(width - name.length),
+  value: `"${value}"`,
+  comma: index < fields.length - 1 ? ',' : '',
+}));
+const plain = [
+  `@${entryType}{${citationKey},`,
+  ...lines.map((line) => `  ${line.name}${line.pad} = ${line.value}${line.comma}`),
+  '}',
+].join('\n');
+
+const escape = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const highlighted = [
+  `<span class="cb-type">@${escape(entryType)}</span>{<span class="cb-key">${escape(citationKey)}</span>,`,
+  ...lines.map(
+    (line) =>
+      `  <span class="cb-field">${escape(line.name)}</span>${line.pad} = <span class="cb-value">${escape(line.value)}</span>${line.comma}`,
+  ),
+  '}',
+].join('\n');
+---
+
+<figure class="citation-block" data-citation-block>
+  <div class="citation-block__bar">
+    <span class="citation-block__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="citation-block__label">BibTeX</span>
+    <button type="button" class="citation-block__copy" data-citation-copy aria-label="Copy BibTeX citation">Copy</button>
+  </div>
+  <pre class="citation-block__code" data-citation-text={plain}><code set:html={highlighted} /></pre>
+</figure>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-citation-block]').forEach((block) => {
+    const button = block.querySelector<HTMLButtonElement>('[data-citation-copy]');
+    const text = block.querySelector<HTMLElement>('[data-citation-text]')?.dataset.citationText ?? '';
+    if (!button) return;
+    let timer: number | undefined;
+
+    const copy = async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      }
+      button.textContent = 'Copied';
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => (button.textContent = 'Copy'), 1600);
+    };
+
+    button.addEventListener('click', copy);
+  });
+</script>
+
+<style>
+  .citation-block {
+    margin: 1.5rem 0 0;
+    border: 1px solid #d9dfe1;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .citation-block__bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px 8px 14px;
+    border-bottom: 1px solid #d9dfe1;
+    background: #f7f9f8;
+  }
+
+  .citation-block__dots {
+    display: inline-flex;
+    gap: 6px;
+  }
+
+  .citation-block__dots i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d9dfe1;
+  }
+
+  .citation-block__label,
+  .citation-block__copy {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .citation-block__label {
+    color: #505a65;
+  }
+
+  .citation-block__copy {
+    margin-left: auto;
+    padding: 4px 10px;
+    border: 1px solid #c9d1d4;
+    border-radius: 6px;
+    background: #fff;
+    color: #505a65;
+    cursor: pointer;
+  }
+
+  .citation-block__copy:hover {
+    border-color: #8a96a0;
+    color: #222730;
+  }
+
+  .citation-block__copy:focus-visible {
+    outline: 2px solid #00856a;
+    outline-offset: 2px;
+  }
+
+  .citation-block .citation-block__code {
+    margin: 0;
+    padding: 16px 18px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #505a65;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .citation-block__code code {
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+  }
+
+  .citation-block :global(.cb-type),
+  .citation-block :global(.cb-key) {
+    color: #496a92;
+  }
+
+  .citation-block :global(.cb-field) {
+    color: #496a92;
+    font-weight: 600;
+  }
+
+  .citation-block :global(.cb-value) {
+    color: #00856a;
+  }
+</style>

@@ -67,6 +67,12 @@ html {
 	-ms-overflow-style: none;
 }
 
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+}
+
 body {
 	font-family: var(--font-body);
 	margin: 0;

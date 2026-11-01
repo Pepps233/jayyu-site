@@ -1,6 +1,6 @@
 ---
 title: 'Teaching a Small Model When to Call a Tool with On-Policy Distillation with Token-Level Teacher Feedback'
-description: 'My experiment and design decisions distilling Qwen3.5-0.8B: improving results on 500 BFCL-V4 tasks by 13.27 percentage points'
+description: 'Experiment and design decisions for distilling Qwen3.5-0.8B: improving results on 500 BFCL-V4 tasks by 13.27 percentage points'
 pubDate: 'Oct 16 2026'
 heroImage: '../../assets/images/qwen-distillation-hero.png'
 tags: ['AI', 'LLM', 'Distillation', 'Tool Calling']
@@ -39,7 +39,7 @@ Those teacher scores supplied the learning signal for each student weight update
 
 For each sampled token, the reward is:
 
-<p>r<sub>t</sub> = log p<sub>teacher</sub>(y<sub>t</sub> | prefix) − log p<sub>student</sub>(y<sub>t</sub> | prefix)</p>
+<p class="formula">r<sub>t</sub> = log p<sub>teacher</sub>(y<sub>t</sub> | prefix) − log p<sub>student</sub>(y<sub>t</sub> | prefix)</p>
 
 Here, y<sub>t</sub> is the student's t-th token, and the prefix is the prompt plus every token sampled before it.
 Summed over a response, these rewards form a single-sample estimate of the negative reverse KL divergence from the student to the teacher.
