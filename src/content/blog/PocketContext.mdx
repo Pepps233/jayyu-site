@@ -18,7 +18,7 @@ Context management trades off the detail an agent can recall directly against ho
 
 Pocket Context lets the agent choose which parts of its history to compact and when. A separate compressor replaces the selected exchanges with a tagged summary and archives the originals. The agent keeps working with the shorter context and can bring back the original messages in full whenever it needs more detail.
 
-Pocket Context Agent (PCA) reached **80.67%** accuracy, compared with **68.00%** for ReAct, **72.67%** for ReSum, and **80.67%** for ACM under the same model and evaluation settings.
+On 150 BrowseComp-Plus tasks ([Chen et al., 2025](https://arxiv.org/abs/2508.06600))[^chen], Pocket Context Agent (PCA) reached **80.67%** accuracy, compared with **68.00%** for ReAct, **72.67%** for ReSum, and **80.67%** for ACM under the same model and evaluation settings.
 Its mean per-task peak input was **61.98K tokens**, versus **71.59K** for ReAct, **70.37K** for ReSum, and **65.28K** for ACM.
 On SWE-bench Verified, ReAct led at 128K, but PCA led at 32K. PCA lost only **3.2 percentage points** as the window shrank, versus **12.8** for ReAct, suggesting greater robustness under context pressure.
 
