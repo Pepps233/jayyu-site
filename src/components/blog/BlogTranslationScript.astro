@@ -122,11 +122,24 @@
     };
 
     const listLanguageKey = 'jay-blog-list-language';
+    const requestedLanguage = new URLSearchParams(window.location.search).get('lang');
+    const hasRequestedLanguage = requestedLanguage === 'en' || requestedLanguage === 'zh';
     let listLanguage = 'en';
     try {
       const stored = localStorage.getItem(listLanguageKey);
       if (stored === 'en' || stored === 'zh') listLanguage = stored;
     } catch {}
+    if (hasRequestedLanguage) {
+      listLanguage = requestedLanguage;
+      try { localStorage.setItem(listLanguageKey, listLanguage); } catch {}
+    }
+
+    const updateLanguageQuery = (language) => {
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has('lang')) return;
+      url.searchParams.set('lang', language);
+      window.history.replaceState(window.history.state, '', url);
+    };
 
     const updateListButtons = () => {
       const hasTranslations = [...document.querySelectorAll('[data-blog-list] .blog-row')]
@@ -143,9 +156,9 @@
       document.querySelectorAll('[data-blog-translation-root]').forEach((root) => {
         const language = root.closest('[data-blog-list]')
           ? listLanguage
-          : getStoredLanguage(root) || getDefaultLanguage(root);
+          : (hasRequestedLanguage ? requestedLanguage : null) || getStoredLanguage(root) || getDefaultLanguage(root);
         applyLanguage(root, language);
-        if (root.closest('[data-blog-list]')) storeLanguage(root, getCurrentLanguage(root));
+        if (root.closest('[data-blog-list]') || hasRequestedLanguage) storeLanguage(root, getCurrentLanguage(root));
       });
       updateListButtons();
     };
@@ -154,6 +167,7 @@
       const listButton = event.target.closest('[data-blog-translate-all]');
       if (listButton) {
         listLanguage = listLanguage === 'en' ? 'zh' : 'en';
+        updateLanguageQuery(listLanguage);
         try { localStorage.setItem(listLanguageKey, listLanguage); } catch {}
         document.querySelectorAll('[data-blog-list] [data-blog-translation-root]').forEach((root) => {
           if (!getLanguages(root).includes(listLanguage)) return;
@@ -181,6 +195,7 @@
 
       const nextLanguage = getNextLanguage(root);
       storeLanguage(root, nextLanguage);
+      if (root.hasAttribute('data-blog-article')) updateLanguageQuery(nextLanguage);
 
       if (root.hasAttribute('data-blog-card') || root.hasAttribute('data-blog-article')) {
         animateLanguage(root, nextLanguage);

@@ -1,0 +1,66 @@
+- generic [active] [ref=f13e1]:
+  - main [ref=f13e2]:
+    - article [ref=f13e3]:
+      - link "Back" [ref=f13e4] [cursor=pointer]:
+        - /url: /blog/life/
+        - generic [aria-hidden] [ref=f13e5]: ←
+        - text: Back
+      - generic [ref=f13e7]:
+        - generic [ref=f13e8]:
+          - time [ref=f13e9]: Jul 2, 2026
+          - button "Translate to 中文" [ref=f13e10] [cursor=pointer]
+        - heading "To Live - Yu Hua" [level=1] [ref=f13e11]
+        - link "Jay Yu" [ref=f13e13] [cursor=pointer]:
+          - /url: /blog/author/jay-yu/
+      - generic [ref=f13e16]:
+        - paragraph [ref=f13e17]:
+          - img "An elderly farmer and an old ox walking together through harvested fields at sunset." [ref=f13e18]
+        - paragraph [ref=f13e19]: "Long before I encountered Yu Hua’s writing, I came across these two lines: “Fugui, there are six people in your family.” “Fugui, there are five graves in your family.” Before I had read the book, I more or less imagined that Fugui’s life must be unbearably bitter, even though his name carries such an auspicious meaning. Recently, I finally had the opportunity to read it, and these are my reflections:"
+        - paragraph [ref=f13e20]:
+          - emphasis [ref=f13e21]: To Live
+          - text: "follows the life of its protagonist, Fugui. Through the dramatic turns of his fate, the novel portrays the transformations of twentieth-century Chinese society and offers a parable of ordinary people struggling to survive beneath the crushing weight of their times. Fugui’s life is tragic, at least for most of it. Suffering and misfortune are magnified without limit in him, forcing me to confront a question clearly: when a person has endured so many calamities capable of stripping away his dignity, how does he continue living, and how can he find meaning in life amid all that suffering?"
+        - paragraph [ref=f13e22]: "For a long time after finishing the book, I saw Fugui as an unfeeling sufferer, little more than a walking corpse. One heartbreak follows another, crushing him until he no longer knows how to face the days ahead, and so he arrives at this conclusion: a person lives for nothing else; a person lives simply to live. But on closer thought, when the elderly Fugui recounts the events of his life, his voice contains more than regret and unwillingness to accept what happened. More than anything, it contains remembrance. I thought about this for a long time: how can a person do that? After losing his parents, his wife, both of his children, and his grandson, how can he still look back with longing? Slowly, I came to understand. Whether positive or negative, a person’s experiences remain their experiences. The brief joys that came before disaster are also worthy of celebration, recollection, and remembrance."
+        - paragraph [ref=f13e23]: Fugui goes from compulsive gambling and reckless self-indulgence, to family ruin and submitting to whatever comes, and finally to calmly embracing the emptiness of existence. What he learns is never how to regard life and death, but how to understand the meaning of living through one loss after another.
+        - paragraph [ref=f13e24]: "Below are some scenes that remain vivid in my memory, recorded here so that I will not forget them in the years ahead:"
+        - paragraph [ref=f13e25]: "After Long Er schemes to win Fugui’s family property from him at the gambling table, Fugui’s father does not let him repay the debt with lightweight silver dollars or banknotes. Instead, he converts the entire family fortune into heavy copper coins and makes Fugui carry them over, load by load. For the first time, the young Fugui feels the physical weight of money instead of seeing it as two weightless lines in a ledger. He also comes to understand just how hard-won that slow accumulation was: from a chicken to a goose, from a goose to a sheep, and from a sheep to an ox."
+        - paragraph [ref=f13e26]: "Fugui’s name is Fugui. Fugui, Fugui: good fortune is, of course, precious. Fortune is hard to come by, and keeping it close is harder still. The backlash that follows once fortune has scattered is something I would never be willing to bear."
+        - paragraph [ref=f13e27]: Fengxia is left deaf and unable to speak after a high fever, then later dies from postpartum hemorrhaging; Youqing, small and thin, later dies after too much of his blood is drawn; Kugen, whose name means “Bitter Root,” is given that name because he loses his mother at birth, helps his father and grandfather with their work from childhood, and ultimately dies after eating too many beans. Fate leaves behind too many riddles, and it always seems to have countless seemingly absurd ways of shattering your hopes. The only thing we can do is accept what comes.
+        - paragraph [ref=f13e28]:
+          - text: I offer this essay in remembrance of Fugui’s life, from a pampered young heir to a man tempered into one who could bear suffering. Thank you to
+          - emphasis [ref=f13e29]: To Live
+          - text: ", and thank you for reading."
+      - navigation "Post navigation" [ref=f13e31]:
+        - generic [ref=f13e32]:
+          - link "Previous I Joined Hack the Future @ Purdue University!" [ref=f13e33] [cursor=pointer]:
+            - /url: /blog/post4/
+            - generic [ref=f13e36]:
+              - generic [ref=f13e37]: Previous
+              - generic [ref=f13e38]: I Joined Hack the Future @ Purdue University!
+          - link "Next 在矛盾中，看清自己：读《矛盾论》有感" [ref=f13e39] [cursor=pointer]:
+            - /url: /blog/on-contradiction/
+            - generic [ref=f13e40]:
+              - generic [ref=f13e41]: Next
+              - generic [ref=f13e42]: 在矛盾中，看清自己：读《矛盾论》有感
+  - contentinfo [ref=f13e45]:
+    - generic [ref=f13e46]:
+      - generic [ref=f13e47]:
+        - link "Jay Yu" [ref=f13e48] [cursor=pointer]:
+          - /url: /
+        - generic "Contact links" [ref=f13e49]:
+          - link "[linkedin]" [ref=f13e50] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/yujay1/
+          - link "[alphaxiv]" [ref=f13e51] [cursor=pointer]:
+            - /url: https://www.alphaxiv.org/@jay-yu-2
+          - link "[github]" [ref=f13e52] [cursor=pointer]:
+            - /url: https://github.com/Pepps233
+          - link "[email]" [ref=f13e53] [cursor=pointer]:
+            - /url: mailto:jialey2025@gmail.com
+          - link "[x]" [ref=f13e54] [cursor=pointer]:
+            - /url: https://x.com/pepps233
+      - generic [ref=f13e55]:
+        - link "[about]" [ref=f13e56] [cursor=pointer]:
+          - /url: /about/
+        - link "[blog]" [ref=f13e57] [cursor=pointer]:
+          - /url: /blog/
+        - link "[home]" [ref=f13e58] [cursor=pointer]:
+          - /url: /

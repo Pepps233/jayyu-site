@@ -2,7 +2,7 @@
 title: '《活着》 - 余华'
 description: '从纨绔子弟到白发老农，福贵用一生的悲欢离合，讲了一个关于失去、承受与怀念的故事。这是我读完《活着》后的一些感想：关于苦难如何塑造一个人，也关于人为什么还要活下去。'
 pubDate: 'Jul 2 2026'
-heroImage: '../../assets/images/huozhe.jpg'
+heroImage: '../../assets/images/to-live-hero.png'
 tags: ['Books', 'Literature', 'Reflection', 'Personal']
 category: 'Reading'
 pinned: true
@@ -10,6 +10,13 @@ language: 'zh'
 defaultLanguage: 'zh'
 translationKey: 'to-live-yu-hua'
 ---
+
+<figure class="article-figure">
+
+![夕阳下，一位老农和一头老牛并肩走过收割后的田野。](../../assets/images/to-live-hero.png)
+
+<figcaption>夕阳下，福贵与老牛走过田野。</figcaption>
+</figure>
 
 很早之前，在接触余华的文字之前，我就看见了这样一句话：“福贵，你家六口人啊”“福贵，你家五口坟啊”。
 在没有读到这本书之前，我心里大抵是这样想的：福贵的一生肯定苦不堪言，明明有个寓意这么好的名字。

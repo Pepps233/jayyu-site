@@ -111,11 +111,42 @@
   height: auto;
 }
 
-.article-repository-note {
+.article-repository-note,
+.article-translation-note {
   margin: 8px 0 0;
   color: #595959;
   font-size: 12px;
   line-height: 1.65;
+}
+
+.article-translation-note a {
+  border-bottom: 1px solid currentColor;
+}
+
+.article-translation-note a:hover {
+  border-bottom-width: 2px;
+}
+
+.article-prose .article-figure {
+  margin: 0 0 28px;
+}
+
+.article-prose .article-figure p {
+  margin: 0;
+}
+
+.article-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.article-figure figcaption {
+  margin-top: 8px;
+  color: #737373;
+  font-size: 12px;
+  line-height: 1.65;
+  text-align: center;
 }
 
 .article-repository:hover {

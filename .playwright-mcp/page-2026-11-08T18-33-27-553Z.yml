@@ -1,0 +1,80 @@
+- generic [active] [ref=f5e1]:
+  - main [ref=f5e2]:
+    - generic [ref=f5e4]:
+      - generic [ref=f5e5]:
+        - heading "[Blog / Technical]" [level=1] [ref=f5e6]
+        - paragraph [ref=f5e7]: Research notes, technical experiments, and things I build.
+      - generic [ref=f5e8]:
+        - button "Translate to 中文" [ref=f5e9] [cursor=pointer]
+        - navigation "Blog topics" [ref=f5e10]:
+          - link "Technical" [ref=f5e11] [cursor=pointer]:
+            - /url: /blog/
+          - link "Life" [ref=f5e12] [cursor=pointer]:
+            - /url: /blog/life/
+    - region "Technical posts" [ref=f5e13]:
+      - generic [ref=f5e14]:
+        - generic [aria-hidden] [ref=f5e15]:
+          - generic [ref=f5e16]: Date
+          - generic [ref=f5e17]: Title
+        - article [ref=f5e18]:
+          - 'link "Read Voyage: A Long-Running Mode for Ambitious Coding" [ref=f5e19] [cursor=pointer]':
+            - /url: /blog/voyage/
+            - time [ref=f5e21]: Nov 7, 2026
+            - generic [ref=f5e22]:
+              - 'heading "Voyage: A Long-Running Mode for Ambitious Coding" [level=3] [ref=f5e23]'
+              - paragraph [ref=f5e25]:
+                - generic [ref=f5e26]: "Introducing Voyage in Diffex: agent-controlled context management for coding tasks that take hours or days."
+            - generic [aria-hidden] [ref=f5e27]: →
+        - article [ref=f5e28]:
+          - 'link "Read Pocket Context: Agent-Controlled Compaction with Lossless Recall for Long-Horizon Tasks" [ref=f5e29] [cursor=pointer]':
+            - /url: /blog/pocket-context/
+            - time [ref=f5e31]: Nov 1, 2026
+            - generic [ref=f5e32]:
+              - 'heading "Pocket Context: Agent-Controlled Compaction with Lossless Recall for Long-Horizon Tasks" [level=3] [ref=f5e33]'
+              - paragraph [ref=f5e35]:
+                - generic [ref=f5e36]: A context-management method in which the agent chooses which parts of its history to compact, archives the originals, and expands them word for word when it needs them again
+            - generic [aria-hidden] [ref=f5e37]: →
+        - article [ref=f5e38]:
+          - link "Read Teaching a Small Model When to Call a Tool with On-Policy Distillation with Token-Level Teacher Feedback" [ref=f5e39] [cursor=pointer]:
+            - /url: /blog/qwen-tool-calling-distillation/
+            - time [ref=f5e41]: Oct 16, 2026
+            - generic [ref=f5e42]:
+              - heading "Teaching a Small Model When to Call a Tool with On-Policy Distillation with Token-Level Teacher Feedback" [level=3] [ref=f5e43]
+              - paragraph [ref=f5e45]:
+                - generic [ref=f5e46]: "Experiment and design decisions for distilling Qwen3.5-0.8B: improving results on 500 BFCL-V4 tasks by 13.27 percentage points"
+            - generic [aria-hidden] [ref=f5e47]: →
+        - article [ref=f5e48]:
+          - 'link "Read Exploring LoRA: Efficient Fine-Tuning for Large Language Models" [ref=f5e49] [cursor=pointer]':
+            - /url: /blog/post3/
+            - time [ref=f5e51]: Oct 4, 2025
+            - generic [ref=f5e52]:
+              - 'heading "Exploring LoRA: Efficient Fine-Tuning for Large Language Models" [level=3] [ref=f5e53]'
+              - paragraph [ref=f5e55]:
+                - generic [ref=f5e56]: A deep dive into LoRA (Low-Rank Adaptation) and how it enables efficient, task-specific fine-tuning of large language models without massive compute or storage costs.
+            - generic [aria-hidden] [ref=f5e57]: →
+      - complementary "Article preview" [ref=f5e58]:
+        - 'link "Voyage: A Long-Running Mode for Ambitious Coding" [ref=f5e59] [cursor=pointer]':
+          - /url: /blog/voyage/
+  - contentinfo [ref=f5e63]:
+    - generic [ref=f5e64]:
+      - generic [ref=f5e65]:
+        - link "Jay Yu" [ref=f5e66] [cursor=pointer]:
+          - /url: /
+        - generic "Contact links" [ref=f5e67]:
+          - link "[linkedin]" [ref=f5e68] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/yujay1/
+          - link "[alphaxiv]" [ref=f5e69] [cursor=pointer]:
+            - /url: https://www.alphaxiv.org/@jay-yu-2
+          - link "[github]" [ref=f5e70] [cursor=pointer]:
+            - /url: https://github.com/Pepps233
+          - link "[email]" [ref=f5e71] [cursor=pointer]:
+            - /url: mailto:jialey2025@gmail.com
+          - link "[x]" [ref=f5e72] [cursor=pointer]:
+            - /url: https://x.com/pepps233
+      - generic [ref=f5e73]:
+        - link "[about]" [ref=f5e74] [cursor=pointer]:
+          - /url: /about/
+        - link "[blog]" [ref=f5e75] [cursor=pointer]:
+          - /url: /blog/
+        - link "[home]" [ref=f5e76] [cursor=pointer]:
+          - /url: /

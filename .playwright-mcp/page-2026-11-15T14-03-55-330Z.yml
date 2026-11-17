@@ -1,0 +1,89 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - heading "[Blog / Life]" [level=1] [ref=e6]
+        - paragraph [ref=e7]: Reflections, books, and stories from everyday life.
+      - generic [ref=e8]:
+        - button "Translate to 中文" [ref=e9] [cursor=pointer]
+        - navigation "Blog topics" [ref=e10]:
+          - link "Technical" [ref=e11] [cursor=pointer]:
+            - /url: /blog/
+          - link "Life" [ref=e12] [cursor=pointer]:
+            - /url: /blog/life/
+    - region "Life posts" [ref=e13]:
+      - generic [ref=e14]:
+        - generic [aria-hidden] [ref=e15]:
+          - generic [ref=e16]: Date
+          - generic [ref=e17]: Title
+        - article [ref=e18]:
+          - 'link "Read Seeing Myself Through Contradiction: Reading On Contradiction" [ref=e19] [cursor=pointer]':
+            - /url: /blog/on-contradiction/
+            - time [ref=e21]: Nov 15, 2026
+            - generic [ref=e22]:
+              - 'heading "Seeing Myself Through Contradiction: Reading On Contradiction" [level=3] [ref=e23]'
+              - paragraph [ref=e25]:
+                - generic [ref=e26]: "Questions from reading On Contradiction: have we understood the situation, found the central problem, or turned disagreement into opposition too quickly?"
+            - generic [aria-hidden] [ref=e27]: →
+        - article [ref=e28]:
+          - link "Read To Live - Yu Hua" [ref=e29] [cursor=pointer]:
+            - /url: /blog/to-live-yu-hua/
+            - time [ref=e31]: Jul 2, 2026
+            - generic [ref=e32]:
+              - heading "To Live - Yu Hua" [level=3] [ref=e33]
+              - paragraph [ref=e35]:
+                - generic [ref=e36]: "From a pampered young heir to a white-haired old farmer, Fugui tells a story of loss, endurance, and remembrance through a lifetime of joys and sorrows. These are some of my reflections after reading To Live: on how suffering shapes a person, and why people still go on living."
+            - generic [aria-hidden] [ref=e37]: →
+        - article [ref=e38]:
+          - link "Read I Joined Hack the Future @ Purdue University!" [ref=e39] [cursor=pointer]:
+            - /url: /blog/post4/
+            - time [ref=e41]: Oct 12, 2025
+            - generic [ref=e42]:
+              - heading "I Joined Hack the Future @ Purdue University!" [level=3] [ref=e43]
+              - paragraph [ref=e45]:
+                - generic [ref=e46]: Thrilled to announce I’m now part of Hack the Future @ Purdue University! 🚀
+            - generic [aria-hidden] [ref=e47]: →
+        - article [ref=e48]:
+          - link "Read I Joined Crcle AI As A Software Engineer Intern!" [ref=e49] [cursor=pointer]:
+            - /url: /blog/post1/
+            - time [ref=e51]: Oct 4, 2025
+            - generic [ref=e52]:
+              - heading "I Joined Crcle AI As A Software Engineer Intern!" [level=3] [ref=e53]
+              - paragraph [ref=e55]:
+                - generic [ref=e56]: My first ever experience as a Software Engineer.
+            - generic [aria-hidden] [ref=e57]: →
+        - article [ref=e58]:
+          - link "Read My Journey with Rambots FRC 2204" [ref=e59] [cursor=pointer]:
+            - /url: /blog/post2/
+            - time [ref=e61]: Oct 4, 2025
+            - generic [ref=e62]:
+              - heading "My Journey with Rambots FRC 2204" [level=3] [ref=e63]
+              - paragraph [ref=e65]:
+                - generic [ref=e66]: The most memorable moments with Rambots weren’t awards—they were the laughs, brainstorms, and late nights together.
+            - generic [aria-hidden] [ref=e67]: →
+      - complementary "Article preview" [ref=e68]:
+        - 'link "Seeing Myself Through Contradiction: Reading On Contradiction" [ref=e69] [cursor=pointer]':
+          - /url: /blog/on-contradiction/
+  - contentinfo [ref=e73]:
+    - generic [ref=e74]:
+      - generic [ref=e75]:
+        - link "Jay Yu" [ref=e76] [cursor=pointer]:
+          - /url: /
+        - generic "Contact links" [ref=e77]:
+          - link "[linkedin]" [ref=e78] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/yujay1/
+          - link "[alphaxiv]" [ref=e79] [cursor=pointer]:
+            - /url: https://www.alphaxiv.org/@jay-yu-2
+          - link "[github]" [ref=e80] [cursor=pointer]:
+            - /url: https://github.com/Pepps233
+          - link "[email]" [ref=e81] [cursor=pointer]:
+            - /url: mailto:jialey2025@gmail.com
+          - link "[x]" [ref=e82] [cursor=pointer]:
+            - /url: https://x.com/pepps233
+      - generic [ref=e83]:
+        - link "[about]" [ref=e84] [cursor=pointer]:
+          - /url: /about/
+        - link "[blog]" [ref=e85] [cursor=pointer]:
+          - /url: /blog/
+        - link "[home]" [ref=e86] [cursor=pointer]:
+          - /url: /

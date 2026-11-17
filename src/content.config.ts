@@ -23,6 +23,8 @@ const blog = defineCollection({
 			repositoryNote: z.string().optional(),
 			pinned: z.boolean().default(false),
 			language: blogLanguage.default('en'),
+			// Set on AI translations to show the shared note and link to the source language.
+			aiTranslatedFrom: blogLanguage.optional(),
 			defaultLanguage: blogLanguage.default('en'),
 			translationKey: z.string().optional(),
 		}),

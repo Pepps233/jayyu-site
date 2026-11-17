@@ -1,0 +1,28 @@
+---
+import { BLOG_LANGUAGE_LABELS, type BlogLanguage, type BlogPostGroup } from '../../lib/blog';
+
+interface Props {
+  postGroup: BlogPostGroup;
+}
+
+const { postGroup } = Astro.props;
+const languageNames: Record<BlogLanguage, string> = { en: 'English', zh: 'Chinese' };
+---
+
+{postGroup.languages.map((language) => {
+  const originalLanguage = postGroup.translations[language]?.data.aiTranslatedFrom;
+  if (!originalLanguage || originalLanguage === language || !postGroup.translations[originalLanguage]) return null;
+
+  return (
+    <p
+      class:list={['article-translation-note', 'blog-lang-fragment', { 'is-active': language === postGroup.defaultLanguage }]}
+      data-blog-lang={language}
+      aria-hidden={language === postGroup.defaultLanguage ? 'false' : 'true'}
+    >
+      <em>
+        This post was originally written in {languageNames[originalLanguage]} and translated into {languageNames[language]} by AI.{' '}
+        To read the original, <a href={`/blog/?lang=${originalLanguage}`}>return to the blog</a> with “Translate to {BLOG_LANGUAGE_LABELS[originalLanguage]}” already selected.
+      </em>
+    </p>
+  );
+})}

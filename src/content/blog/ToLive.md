@@ -2,14 +2,22 @@
 title: 'To Live - Yu Hua'
 description: 'From a pampered young heir to a white-haired old farmer, Fugui tells a story of loss, endurance, and remembrance through a lifetime of joys and sorrows. These are some of my reflections after reading To Live: on how suffering shapes a person, and why people still go on living.'
 pubDate: 'Jul 2 2026'
-heroImage: '../../assets/images/huozhe.jpg'
+heroImage: '../../assets/images/to-live-hero.png'
 tags: ['Books', 'Literature', 'Reflection', 'Personal']
 category: 'Reading'
 pinned: true
 language: 'en'
+aiTranslatedFrom: 'zh'
 defaultLanguage: 'zh'
 translationKey: 'to-live-yu-hua'
 ---
+
+<figure class="article-figure">
+
+![An elderly farmer and an old ox walking together through harvested fields at sunset.](../../assets/images/to-live-hero.png)
+
+<figcaption>Fugui and his old ox, walking through the fields at sunset.</figcaption>
+</figure>
 
 Long before I encountered Yu Hua’s writing, I came across these two lines: “Fugui, there are six people in your family.”
 “Fugui, there are five graves in your family.”

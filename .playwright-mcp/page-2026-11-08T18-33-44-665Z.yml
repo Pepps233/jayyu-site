@@ -1,0 +1,70 @@
+- generic [active] [ref=f6e1]:
+  - main [ref=f6e2]:
+    - article [ref=f6e3]:
+      - link "Back" [ref=f6e4] [cursor=pointer]:
+        - /url: /blog/
+        - generic [aria-hidden] [ref=f6e5]: ←
+        - text: Back
+      - generic [ref=f6e7]:
+        - time [ref=f6e9]: Nov 7, 2026
+        - 'heading "Voyage: A Long-Running Mode for Ambitious Coding" [level=1] [ref=f6e10]'
+        - link "Jay Yu" [ref=f6e12] [cursor=pointer]:
+          - /url: /blog/author/jay-yu/
+      - generic [ref=f6e15]:
+        - paragraph [ref=f6e16]: "We built Voyage, a new long-running mode for Diffex, for ambitious coding tasks: porting a framework, designing a product, or building one from zero to one. The bet is that frequent compaction with active recall matters more than a large context window alone."
+        - heading "Give Voyage a destination" [level=2] [ref=f6e17]
+        - paragraph [ref=f6e18]:
+          - text: Voyage works best with an outcome the agent can verify. Start with
+          - code [ref=f6e19]: /plan
+          - text: ", then activate Voyage with"
+          - code [ref=f6e20]: /goal
+          - text: in the Diffex CLI.
+        - heading "Benchmark setup and cost" [level=2] [ref=f6e21]
+        - paragraph [ref=f6e22]:
+          - text: On 15 CPU-only SWE-Marathon v1.1 tasks, eight trials each, Voyage with GPT-6 Luna reached a
+          - strong [ref=f6e23]: 22.5% full-pass rate
+          - text: ", 4.2 percentage points above the same model in Codex. Its"
+          - strong [ref=f6e24]: 79.1% mean partial score at $1.54 per trial
+          - text: nearly matched Kimi K3’s 79.3% at about $850. Partial credit measures progress, not a completed task.
+        - paragraph [ref=f6e25]:
+          - img "Mean partial score versus model cost per trial, with Voyage highlighted at 79.1% and $1.54." [ref=f6e26]
+        - heading "Voyage context management" [level=2] [ref=f6e27]
+        - paragraph [ref=f6e28]:
+          - text: Built on
+          - link "Pocket Context" [ref=f6e29] [cursor=pointer]:
+            - /url: /blog/pocket-context/
+          - text: ", Voyage lets the agent choose what to compact and when. Original evidence stays archived; a recall subagent searches it and returns a cited answer when details are needed."
+        - heading "Try Voyage" [level=2] [ref=f6e30]
+        - paragraph [ref=f6e31]:
+          - link "Read the full announcement on the Diffex blog" [ref=f6e32] [cursor=pointer]:
+            - /url: https://diffex.ai/blog/voyage
+          - text: for installation, benchmark details, and the implementation.
+      - navigation "Post navigation" [ref=f6e34]:
+        - 'link "Previous Pocket Context: Agent-Controlled Compaction with Lossless Recall for Long-Horizon Tasks" [ref=f6e36] [cursor=pointer]':
+          - /url: /blog/pocket-context/
+          - generic [ref=f6e39]:
+            - generic [ref=f6e40]: Previous
+            - generic [ref=f6e41]: "Pocket Context: Agent-Controlled Compaction with Lossless Recall for Long-Horizon Tasks"
+  - contentinfo [ref=f6e43]:
+    - generic [ref=f6e44]:
+      - generic [ref=f6e45]:
+        - link "Jay Yu" [ref=f6e46] [cursor=pointer]:
+          - /url: /
+        - generic "Contact links" [ref=f6e47]:
+          - link "[linkedin]" [ref=f6e48] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/yujay1/
+          - link "[alphaxiv]" [ref=f6e49] [cursor=pointer]:
+            - /url: https://www.alphaxiv.org/@jay-yu-2
+          - link "[github]" [ref=f6e50] [cursor=pointer]:
+            - /url: https://github.com/Pepps233
+          - link "[email]" [ref=f6e51] [cursor=pointer]:
+            - /url: mailto:jialey2025@gmail.com
+          - link "[x]" [ref=f6e52] [cursor=pointer]:
+            - /url: https://x.com/pepps233
+      - generic [ref=f6e53]:
+        - link "[about]" [ref=f6e54] [cursor=pointer]:
+          - /url: /about/
+        - link "[blog]" [ref=f6e55] [cursor=pointer]:
+          - /url: /blog/
+        - link "[home]" [ref=f6e56] [cursor=pointer]:
+          - /url: /

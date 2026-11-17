@@ -1,0 +1,262 @@
+.project-card__topline,
+.post-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.project-card__topline strong {
+  color: var(--accent-dark);
+}
+
+.project-card h3 {
+  margin: 16px 0 10px;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.12;
+}
+
+.project-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.section-copy {
+  max-width: 64ch;
+  margin: 0 0 18px;
+  color: var(--color-text-muted);
+}
+
+.about-profile {
+  display: grid;
+  gap: 14px;
+  margin-bottom: clamp(24px, 4vw, 36px);
+}
+
+.about-profile__photo {
+  width: clamp(150px, 20vw, 230px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: center;
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+}
+
+.project-card {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.project-card__icon {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  background: #f6f8fa;
+  color: var(--accent-dark);
+}
+
+.project-card__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.project-card ul {
+  margin: 16px 0 0;
+  padding-left: 1.1rem;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.project-card li + li {
+  margin-top: 8px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.card-actions {
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.stretched-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.interactive-link {
+  position: relative;
+  z-index: 2;
+}
+
+.post-card {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.post-card__image {
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--color-border-light);
+  background: #eef0f3;
+  overflow: hidden;
+}
+
+.post-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.post-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: clamp(18px, 3vw, 24px);
+}
+
+.post-card h3 {
+  margin: 14px 0 8px;
+  font-size: clamp(1.2rem, 2.1vw, 1.55rem);
+  line-height: 1.14;
+}
+
+.post-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.post-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.featured-post {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.featured-post__image {
+  min-height: 280px;
+  border-right: 1px solid var(--color-border-light);
+  background: #eef0f3;
+}
+
+.featured-post__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 0;
+}
+
+.featured-post__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(20px, 4vw, 36px);
+}
+
+.featured-post h3 {
+  margin: 14px 0;
+  font-size: clamp(1.75rem, 3.8vw, 3.2rem);
+  line-height: 1;
+}
+
+.featured-post p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.sw-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sw-share-btn {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.sw-share-btn:hover {
+  border-color: rgba(var(--accent-rgb), 0.35);
+  color: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.sw-share-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.sw-share-btn svg :not([fill="none"]) {
+  fill: currentColor !important;
+}
+
+.sw-share-btn svg [stroke] {
+  stroke: currentColor !important;
+}
+
+.not-found-panel {
+  display: grid;
+  min-height: 58vh;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.not-found-panel__pattern {
+  display: none;
+}
+
+.not-found-panel__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(24px, 5vw, 56px);
+}
+
+.not-found-panel__content h1 {
+  margin: 12px 0;
+}
+
+.not-found-panel__content p {
+  max-width: 56ch;
+  margin: 0;
+  color: var(--color-text-muted);
+}

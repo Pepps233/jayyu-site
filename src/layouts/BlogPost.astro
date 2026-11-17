@@ -7,6 +7,7 @@ import '../styles/blog-article.css';
 import PostNav from '../components/ui/nav/PostNav.astro';
 import { slugifyTag } from '../lib/slug';
 import BlogTranslationScript from '../components/blog/BlogTranslationScript.astro';
+import BlogTranslationNote from '../components/blog/BlogTranslationNote.astro';
 import { getBlogIndexHref, getBlogSection, type BlogLanguageMeta, type BlogPostGroup } from '../lib/blog';
 
 interface Props {
@@ -133,6 +134,7 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
           {repositoryUrl && repositoryNote && (
             <p class="article-repository-note"><em>{repositoryNote}</em></p>
           )}
+          <BlogTranslationNote postGroup={postGroup} />
         </div>
       </header>
     )}

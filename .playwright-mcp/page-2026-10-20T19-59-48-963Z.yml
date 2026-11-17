@@ -1,0 +1,80 @@
+- generic [active] [ref=f1e1]:
+  - main [ref=f1e2]:
+    - article [ref=f1e3]:
+      - link "Back" [ref=f1e4] [cursor=pointer]:
+        - /url: /blog/
+        - generic [aria-hidden] [ref=f1e5]: ←
+        - text: Back
+      - generic [ref=f1e7]:
+        - generic [ref=f1e8]:
+          - time [ref=f1e9]: Oct 4, 2025
+          - button "Translate to 中文" [ref=f1e10] [cursor=pointer]
+        - 'heading "Exploring LoRA: Efficient Fine-Tuning for Large Language Models" [level=1] [ref=f1e11]'
+        - link "Jay Yu" [ref=f1e13] [cursor=pointer]:
+          - /url: /blog/author/jay-yu/
+      - generic [ref=f1e16]:
+        - 'heading "Exploring LoRA: Efficient Fine-Tuning for Large Language Models" [level=1] [ref=f1e17]'
+        - paragraph [ref=f1e18]:
+          - strong [ref=f1e19]: "Summary:"
+          - text: A deep dive into LoRA (Low-Rank Adaptation) and how it enables efficient, task-specific fine-tuning of large language models without massive compute or storage costs.
+        - separator [ref=f1e20]
+        - paragraph [ref=f1e21]:
+          - text: Recently, I finished reading the research paper
+          - strong [ref=f1e22]: "LoRA: Low-Rank Adaptation of Large Language Models"
+          - text: to learn how to refine and tune generative pre-trained transformers.
+        - paragraph [ref=f1e23]:
+          - strong [ref=f1e24]: LoRA
+          - text: is a method that enables lightweight fine-tuning of large language models via low-rank adapters.
+        - paragraph [ref=f1e25]: "Here are the coolest insights I gained from the paper:"
+        - list [ref=f1e26]:
+          - listitem [ref=f1e27]:
+            - strong [ref=f1e28]: "Lightweight Adapters:"
+            - text: LoRA allows us to train lightweight adapters for large language models. For example, with GPT-3 (350GB), training 100 different LoRA adapters increases storage only to 354GB instead of 35TB.
+          - listitem [ref=f1e29]:
+            - strong [ref=f1e30]: "Low Intrinsic Dimension:"
+            - text: Pre-trained language models have a low intrinsic dimension, meaning they can learn efficiently even when projected into a much smaller subspace.
+          - listitem [ref=f1e31]:
+            - strong [ref=f1e32]: "Efficient Fine-Tuning:"
+            - text: LoRA freezes the original model weights and updates only the low-rank matrices, making fine-tuning cheaper, faster, and more memory-efficient.
+          - listitem [ref=f1e33]:
+            - strong [ref=f1e34]: "Task Specialization:"
+            - text: This approach enables task-specific adaptation without duplicating massive models, allowing quick swapping between adapters.
+          - listitem [ref=f1e35]:
+            - strong [ref=f1e36]: "Strong Performance:"
+            - text: On benchmarks like GLUE, WikiSQL, and SAMSum, LoRA performs comparably to full fine-tuning while drastically reducing compute and storage requirements.
+        - paragraph [ref=f1e37]: I’m excited to experiment with these ideas in the future — from creating smaller, task-specific adapters to exploring how efficient fine-tuning techniques like LoRA can make cutting-edge AI models more practical, scalable, and accessible.
+        - paragraph [ref=f1e38]:
+          - text: Next, I’m starting to read a recent paper published by Thinking Machines Lab titled
+          - emphasis [ref=f1e39]: “LoRA Without Regret”
+          - text: (
+          - link "Thinking Machines Lab, 2025" [ref=f1e40] [cursor=pointer]:
+            - /url: https://thinkingmachines.ai/blog/lora/
+          - text: ) to learn how to tune hyperparameters when refining large language models with LoRA.
+          - img "LoRA Without Regret" [ref=f1e41]
+      - navigation "Post navigation" [ref=f1e43]:
+        - link "Next Teaching a Small Model When to Call a Tool with On-Policy Distillation with Token-Level Teacher Feedback" [ref=f1e46] [cursor=pointer]:
+          - /url: /blog/qwen-tool-calling-distillation/
+          - generic [ref=f1e47]:
+            - generic [ref=f1e48]: Next
+            - generic [ref=f1e49]: Teaching a Small Model When to Call a Tool with On-Policy Distillation with Token-Level Teacher Feedback
+  - contentinfo [ref=f1e52]:
+    - generic [ref=f1e53]:
+      - generic [ref=f1e54]:
+        - link "Jay Yu" [ref=f1e55] [cursor=pointer]:
+          - /url: /
+        - generic "Contact links" [ref=f1e56]:
+          - link "[linkedin]" [ref=f1e57] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/yujay1/
+          - link "[github]" [ref=f1e58] [cursor=pointer]:
+            - /url: https://github.com/Pepps233
+          - link "[email]" [ref=f1e59] [cursor=pointer]:
+            - /url: mailto:jialey2025@gmail.com
+          - link "[x]" [ref=f1e60] [cursor=pointer]:
+            - /url: https://x.com/pepps233
+      - generic [ref=f1e61]:
+        - link "[about]" [ref=f1e62] [cursor=pointer]:
+          - /url: /about/
+        - link "[blog]" [ref=f1e63] [cursor=pointer]:
+          - /url: /blog/
+        - link "[home]" [ref=f1e64] [cursor=pointer]:
+          - /url: /
