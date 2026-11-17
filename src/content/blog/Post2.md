@@ -1,7 +1,8 @@
 ---
 title: 'My Journey with Rambots FRC 2204'
-description: 'The most memorable moments with Rambots weren’t awards—they were the laughs, brainstorms, and late nights together.'
+description: 'Memories from a season with Rambots FRC 2204: competitions, robot testing, and evenings spent with teammates.'
 pubDate: 'Oct 4 2025'
+updatedDate: 'Nov 17 2026'
 heroImage: '../../assets/images/blog2-hero.jpg'
 tags: ['Robotics', 'FRC', 'Competition', 'Personal']
 language: 'en'
@@ -9,23 +10,20 @@ defaultLanguage: 'en'
 translationKey: 'post2'
 ---
 
-# Memories Beyond the Scores: My Journey with Rambots FRC 2204
+Looking back on high school, I find myself remembering the small moments I spent with friends and classmates.
+The grades I worked for and the relief after finishing AP exams are part of those years, but the time with my robotics team is what I return to most often.
 
-**Summary:**  
-Reflecting on my time with Rambots FRC 2204, I realize the most unforgettable moments weren’t awards or exams, but the late nights spent building, laughing, and brainstorming with my amazing teammates.
+In June 2025, Rambots FRC 2204 finished a season in which I served as team captain, software lead, and driver.
+We worked together to build and improve our robot, and our work helped the team finish as regional finalists at the California Sacramento Regional and regional winners at the California East Bay Regional.
 
----
+Many of the memories I keep coming back to took place after school, when our meetings would run until nine in the evening.
+We would build the robot, debug code, share snacks, and talk through problems together.
+Sometimes a subteam would be deep in a discussion when a joke made everyone laugh.
+Other times, a teammate would drive out to get milk tea for the group.
 
-After graduating high school, I would say that my most memorable experiences weren’t receiving the A grades I studied endlessly for, nor the satisfaction after taking the AP exams, nor the “big fun moments.” Instead, it was the **little moments I spent with my friends and classmates**, and most importantly, the time I spent with my **robotics team**.
+After meetings, we would sometimes play games together, only for the conversation to turn back to robotics.
+We often set up the playing field eager to test the robot, then packed it away disappointed when something had not worked as we hoped.
+Those evenings, with both their excitement and frustration, are a large part of how I remember the season.
 
-This June, **Rambots FRC 2204** wrapped up an amazing season. I had the honor of serving as **Team Captain, Software Lead, and Driver**. During this past season, the team worked extremely hard to deliver a high-performance robot that carried our hopes of dominating on the playing field—which we did! Our robot contributed to us being **second-place regional finalists at the California Sacramento Regional** and **first-place regional winners at the California East Bay Regional**.
-
-Some of the most memorable moments took place **after school until 9 PM**, where we would chat, snack, build the robot, debug, and brainstorm together. It was during these late-night meetings that unforgettable memories were made:
-- Subteams would intensely brainstorm solutions, only to be interrupted by a sudden joke that made everyone laugh.
-- Kind teammates would drive out to order milk tea for everyone.
-- Late-night gaming sessions right after robotics meetings, which often turned into more robotics discussions.
-- Always setting up the playing field in excitement to test the robot, and often cleaning it up in disappointment.
-
-These small, shared experiences are what made the season truly special.
-
-My sincere thanks to **Rambots 2204**, and my congratulations to every team member! I hope you all continue to **compete and excel in the upcoming seasons**.
+I’m grateful to Rambots 2204 and to everyone who shared that time with me.
+Congratulations to the team on the season, and I hope the coming years bring more chances to build, compete, and learn together.

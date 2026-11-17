@@ -1,7 +1,8 @@
 ---
-title: '我加入了 Purdue University 的 Hack the Future！'
-description: '很开心宣布，我现在成为了 Purdue University 的 Hack the Future 成员。'
+title: '加入普渡大学的 Hack the Future'
+description: '记录加入普渡大学 Hack the Future 的经历，以及对这个为非营利组织开发软件的学生组织的了解。'
 pubDate: 'Oct 12 2025'
+updatedDate: 'Nov 17 2026'
 heroImage: '../../assets/images/blog4-hero.png'
 tags: ['Software Development', 'Computer Science', 'Nonprofit Organizations', 'Community', 'Personal']
 language: 'zh'
@@ -9,32 +10,14 @@ defaultLanguage: 'en'
 translationKey: 'post4'
 ---
 
-# Hack the Future：为世界各地的非营利组织开发软件
+最近，在完成申请和面试之后，我加入了普渡大学的 Hack the Future。
+Hack the Future，简称 HTF，是一个为世界各地非营利组织开发软件的学生组织。
+他们的工作帮助这些组织改善日常运营，也让它们能够服务更多人。
 
-很开心和大家分享，在经过申请和面试之后，我被 **Purdue University** 的 **Hack the Future** 录取了。
+申请分为背景审核和面试两个部分。
+提交类似简历的材料后，我和一位组织负责人进行了面试。
+面试官很友好，也很有耐心，我有机会介绍自己的兴趣和过去做过的项目。
+这次交流也让我更了解组织的目标，以及各个团队的工作方式。
 
-申请流程分为两个部分。
-
-第一部分是类似 résumé 的背景审核，第二部分是和一位 executive member 进行预约面试。
-
-整个面试过程很顺利。
-
-面试官非常友好，也很有耐心地引导对话。
-
-我得以分享自己的热情和过去的项目经历，这也带来了很多有意思的交流。
-
-这些讨论帮助我更好地理解 **Hack the Future** 的使命和团队结构。
-
-我想感谢 **Hack the Future** 团队组织了这样一次很棒的体验，也感谢他们设计了一个非常清晰的面试流程。
-
-我已经迫不及待想和优秀的同学们一起合作，参与前沿项目，并为技术和创新的未来贡献力量。
-
----
-
-## 关于 Hack the Future
-
-**Hack the Future, HTF** 是 **Purdue University** 的学生组织。
-
-它为世界各地的非营利组织开发软件解决方案。
-
-HTF 的使命是用技术创造社会价值，帮助非营利组织优化运营、扩大影响力，并通过创新和协作给社区带来有意义的改变。
+感谢团队认真安排了这次申请和面试。
+接下来，我期待和其他同学一起工作，参与能够帮助非营利组织的项目。
