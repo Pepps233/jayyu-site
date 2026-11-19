@@ -1,11 +1,12 @@
 ---
-import { BLOG_LANGUAGE_LABELS, type BlogLanguage, type BlogPostGroup } from '../../lib/blog';
+import { getBlogIndexHref, getBlogSection, type BlogLanguage, type BlogPostGroup } from '../../lib/blog';
 
 interface Props {
   postGroup: BlogPostGroup;
 }
 
 const { postGroup } = Astro.props;
+const section = getBlogSection(postGroup);
 const languageNames: Record<BlogLanguage, string> = { en: 'English', zh: 'Chinese' };
 ---
 
@@ -21,7 +22,7 @@ const languageNames: Record<BlogLanguage, string> = { en: 'English', zh: 'Chines
     >
       <em>
         This post was originally written in {languageNames[originalLanguage]} and translated into {languageNames[language]} by AI.{' '}
-        To read the original, <a href={`/blog/?lang=${originalLanguage}`}>return to the blog</a> with “Translate to {BLOG_LANGUAGE_LABELS[originalLanguage]}” already selected.
+        To read the original, <a href={getBlogIndexHref(section, originalLanguage)}>return to the blog in {languageNames[originalLanguage]}</a>.
       </em>
     </p>
   );

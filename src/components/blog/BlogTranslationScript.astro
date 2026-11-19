@@ -91,6 +91,9 @@
 
       if (root.hasAttribute('data-blog-article')) {
         document.documentElement.lang = nextLanguage === 'zh' ? 'zh-CN' : 'en';
+        const backLink = root.querySelector('[data-blog-back-link]');
+        const backHref = backLink?.getAttribute(`data-href-${nextLanguage}`);
+        if (backLink && backHref) backLink.setAttribute('href', backHref);
       }
 
       root.querySelectorAll('[data-blog-lang]').forEach((node) => {
@@ -122,6 +125,7 @@
     };
 
     const listLanguageKey = 'jay-blog-list-language';
+    const routeLanguage = document.querySelector('[data-blog-list-language]')?.getAttribute('data-blog-list-language');
     const requestedLanguage = new URLSearchParams(window.location.search).get('lang');
     const hasRequestedLanguage = requestedLanguage === 'en' || requestedLanguage === 'zh';
     let listLanguage = 'en';
@@ -129,8 +133,9 @@
       const stored = localStorage.getItem(listLanguageKey);
       if (stored === 'en' || stored === 'zh') listLanguage = stored;
     } catch {}
-    if (hasRequestedLanguage) {
-      listLanguage = requestedLanguage;
+    const preferredLanguage = routeLanguage || requestedLanguage;
+    if (preferredLanguage === 'en' || preferredLanguage === 'zh') {
+      listLanguage = preferredLanguage;
       try { localStorage.setItem(listLanguageKey, listLanguage); } catch {}
     }
 
@@ -153,12 +158,25 @@
     };
 
     const initialize = () => {
+      if (routeLanguage && hasRequestedLanguage && requestedLanguage !== routeLanguage) {
+        const alternateHref = document.querySelector('[data-blog-language-link]')?.getAttribute('href');
+        if (alternateHref) {
+          const url = new URL(window.location.href);
+          url.pathname = alternateHref;
+          url.searchParams.delete('lang');
+          window.location.replace(url);
+          return;
+        }
+      }
+
       document.querySelectorAll('[data-blog-translation-root]').forEach((root) => {
         const language = root.closest('[data-blog-list]')
           ? listLanguage
           : (hasRequestedLanguage ? requestedLanguage : null) || getStoredLanguage(root) || getDefaultLanguage(root);
         applyLanguage(root, language);
-        if (root.closest('[data-blog-list]') || hasRequestedLanguage) storeLanguage(root, getCurrentLanguage(root));
+        if (!routeLanguage && (root.closest('[data-blog-list]') || hasRequestedLanguage)) {
+          storeLanguage(root, getCurrentLanguage(root));
+        }
       });
       updateListButtons();
     };

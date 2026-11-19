@@ -40,6 +40,7 @@ const tags = Array.isArray(defaultPost.data.tags) ? defaultPost.data.tags : [];
 const authorName = defaultPost.data.author || 'Jay Yu';
 const languages = languageMeta.map((item) => item.language).join(',');
 const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
+const section = getBlogSection(postGroup);
 ---
 
 <SiteShell
@@ -93,7 +94,13 @@ const documentLanguage = postGroup.defaultLanguage === 'zh' ? 'zh-CN' : 'en';
     data-current-language={postGroup.defaultLanguage}
     data-languages={languages}
   >
-    <a class="article-back no-underline" href={getBlogIndexHref(getBlogSection(postGroup))}>
+    <a
+      class="article-back no-underline"
+      href={getBlogIndexHref(section, postGroup.defaultLanguage)}
+      data-blog-back-link
+      data-href-en={getBlogIndexHref(section, 'en')}
+      data-href-zh={getBlogIndexHref(section, 'zh')}
+    >
       <span aria-hidden="true">←</span> Back
     </a>
     {showHeader && (

@@ -46,8 +46,9 @@ export function getPostSlug(post: BlogPostEntry): string {
   return rawSlug.replace(/^\/+|\/+$/g, '').toLowerCase();
 }
 
-export function getPostHref(group: BlogPostGroup): string {
-  return `/blog/${group.slug}/`;
+export function getPostHref(group: BlogPostGroup, language?: BlogLanguage): string {
+  const path = `/blog/${group.slug}/`;
+  return language && group.languages.length > 1 ? `${path}?lang=${language}` : path;
 }
 
 export function getBlogLanguageMeta(group: BlogPostGroup): BlogLanguageMeta[] {
@@ -81,8 +82,9 @@ export function getBlogSection(group: BlogPostGroup): BlogSection {
     : 'research';
 }
 
-export function getBlogIndexHref(section: BlogSection): string {
-  return section === 'life' ? '/blog/life/' : '/blog/';
+export function getBlogIndexHref(section: BlogSection, language: BlogLanguage = 'en'): string {
+  const base = language === 'zh' ? '/blog-zh' : '/blog';
+  return section === 'life' ? `${base}/life/` : `${base}/`;
 }
 
 export async function getBlogPostGroups(): Promise<BlogPostGroup[]> {

@@ -1,13 +1,16 @@
 ---
 import FormattedDate from '../FormattedDate.astro';
-import { getBlogLanguageMeta, getPostHref, type BlogPostGroup } from '../../lib/blog';
+import { getBlogLanguageMeta, getPostHref, type BlogLanguage, type BlogPostGroup } from '../../lib/blog';
 
 interface Props {
   postGroup: BlogPostGroup;
+  language?: BlogLanguage;
 }
 
-const { postGroup } = Astro.props as Props;
+const { postGroup, language } = Astro.props;
 const post = postGroup.defaultPost;
+const currentLanguage = language && postGroup.translations[language] ? language : postGroup.defaultLanguage;
+const title = postGroup.translations[currentLanguage]?.data.title ?? post.data.title;
 const languageMeta = getBlogLanguageMeta(postGroup);
 const titleAttributes = Object.fromEntries(
   languageMeta.map((item) => [`data-title-${item.language}`, item.title])
@@ -20,22 +23,23 @@ const titleAttributes = Object.fromEntries(
   data-blog-card
   data-blog-slug={postGroup.slug}
   data-default-language={postGroup.defaultLanguage}
-  data-current-language={postGroup.defaultLanguage}
+  data-current-language={currentLanguage}
   data-languages={postGroup.languages.join(',')}
+  lang={currentLanguage === 'zh' ? 'zh-CN' : 'en'}
 >
-  <a href={getPostHref(postGroup)} class="blog-row__link no-underline" data-blog-read-link aria-label={`Read ${post.data.title}`} {...titleAttributes}>
+  <a href={getPostHref(postGroup, language)} class="blog-row__link no-underline" data-blog-read-link aria-label={`Read ${title}`} {...titleAttributes}>
     <span class="blog-row__date"><FormattedDate date={post.data.pubDate} /></span>
     <div class="blog-row__copy">
       <h3 class="blog-translation-stack" data-blog-copy="title">
         {languageMeta.map((item) => (
-          <span class:list={['blog-lang-fragment', { 'is-active': item.language === postGroup.defaultLanguage }]} data-blog-lang={item.language} aria-hidden={item.language === postGroup.defaultLanguage ? 'false' : 'true'}>
+          <span class:list={['blog-lang-fragment', { 'is-active': item.language === currentLanguage }]} data-blog-lang={item.language} aria-hidden={item.language === currentLanguage ? 'false' : 'true'}>
             {item.title}
           </span>
         ))}
       </h3>
       <p class="blog-translation-stack" data-blog-copy="description">
         {languageMeta.map((item) => (
-          <span class:list={['blog-lang-fragment', { 'is-active': item.language === postGroup.defaultLanguage }]} data-blog-lang={item.language} aria-hidden={item.language === postGroup.defaultLanguage ? 'false' : 'true'}>
+          <span class:list={['blog-lang-fragment', { 'is-active': item.language === currentLanguage }]} data-blog-lang={item.language} aria-hidden={item.language === currentLanguage ? 'false' : 'true'}>
             {item.description}
           </span>
         ))}

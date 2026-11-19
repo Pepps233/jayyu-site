@@ -69,6 +69,11 @@
   color: #171717;
 }
 
+a.blog-list-translate {
+  display: inline-flex;
+  align-items: center;
+}
+
 .blog-index {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 224px;

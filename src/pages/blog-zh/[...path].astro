@@ -1,0 +1,28 @@
+---
+import BlogIndex from '../../components/blog/BlogIndex.astro';
+import { BLOG_PAGE_SIZE, getBlogPostGroups, getBlogSection, type BlogSection } from '../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await getBlogPostGroups();
+  const sections: BlogSection[] = ['research', 'life'];
+
+  return sections.flatMap((section) => {
+    const postCount = posts.filter((post) => getBlogSection(post) === section).length;
+    const totalPages = Math.max(1, Math.ceil(postCount / BLOG_PAGE_SIZE));
+    const sectionPath = section === 'life' ? 'life' : undefined;
+
+    return Array.from({ length: totalPages }, (_, index) => {
+      const currentPage = index + 1;
+      const path = currentPage === 1
+        ? sectionPath
+        : `${sectionPath ? 'life/' : ''}page/${currentPage}`;
+
+      return { params: { path }, props: { section, currentPage } };
+    });
+  });
+}
+
+const { section, currentPage } = Astro.props;
+---
+
+<BlogIndex section={section} currentPage={currentPage} language="zh" />

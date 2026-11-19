@@ -3,32 +3,38 @@ import SiteShell from '../SiteShell.astro';
 import BlogLogHeader from './BlogLogHeader.astro';
 import BlogPostList from './BlogPostList.astro';
 import BlogPagination from '../ui/nav/BlogPagination.astro';
-import { BLOG_PAGE_SIZE, getBlogIndexHref, getBlogPostGroups, getBlogSection, type BlogSection } from '../../lib/blog';
+import { BLOG_PAGE_SIZE, getBlogIndexHref, getBlogPostGroups, getBlogSection, type BlogLanguage, type BlogSection } from '../../lib/blog';
 
 interface Props {
   section: BlogSection;
   currentPage?: number;
+  language?: BlogLanguage;
 }
 
-const { section, currentPage = 1 } = Astro.props;
+const { section, currentPage = 1, language = 'en' } = Astro.props;
 const posts = (await getBlogPostGroups()).filter((post) => getBlogSection(post) === section);
 const pagePosts = posts.slice((currentPage - 1) * BLOG_PAGE_SIZE, currentPage * BLOG_PAGE_SIZE);
 const totalPages = Math.max(1, Math.ceil(posts.length / BLOG_PAGE_SIZE));
-const firstPagePath = getBlogIndexHref(section);
+const firstPagePath = getBlogIndexHref(section, language);
 const basePath = `${firstPagePath}page`;
 const pageHref = (page: number) => page === 1 ? firstPagePath : `${basePath}/${page}/`;
+const alternateLanguage = language === 'en' ? 'zh' : 'en';
+const alternateIndexPath = getBlogIndexHref(section, alternateLanguage);
+const alternateHref = currentPage === 1
+  ? alternateIndexPath.slice(0, -1)
+  : `${alternateIndexPath}page/${currentPage}/`;
 const sectionTitle = section === 'life' ? 'Life' : 'Technical';
 const description = section === 'life'
   ? 'Reflections, books, and stories from everyday life.'
   : 'Research notes, technical experiments, and things I build.';
 ---
 
-<SiteShell bodyClass="blog-list-page" title={`Blog / ${sectionTitle}${currentPage > 1 ? ` / Page ${currentPage}` : ''}`} description={description}>
+<SiteShell bodyClass="blog-list-page" title={`Blog / ${sectionTitle}${currentPage > 1 ? ` / Page ${currentPage}` : ''}`} description={description} lang={language === 'zh' ? 'zh-CN' : 'en'}>
   <Fragment slot="head">
     {currentPage > 1 && <link rel="prev" href={pageHref(currentPage - 1)} />}
     {currentPage < totalPages && <link rel="next" href={pageHref(currentPage + 1)} />}
   </Fragment>
-  <BlogLogHeader title={`Blog / ${sectionTitle}`} description={description} section={section} />
-  <BlogPostList posts={pagePosts} title={`${sectionTitle} posts`} />
+  <BlogLogHeader title={`Blog / ${sectionTitle}`} description={description} section={section} language={language} alternateHref={alternateHref} />
+  <BlogPostList posts={pagePosts} title={`${sectionTitle} posts`} language={language} />
   <BlogPagination currentPage={currentPage} totalPages={totalPages} basePath={basePath} firstPagePath={firstPagePath} />
 </SiteShell>
