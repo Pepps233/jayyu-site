@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import portrait from '../../public/images/about-page-photo.png';
+import { author } from '../data/author';
 import '../styles/about.css';
 import SiteShell from '../components/SiteShell.astro';
 import PageHeader from '../components/PageHeader.astro';
@@ -40,7 +40,7 @@ import PageHeader from '../components/PageHeader.astro';
     </div>
     <figure class="about-portrait">
       <Image
-        src={portrait}
+        src={author.avatar}
         alt="Jay Yu"
         widths={[160, 224, 448]}
         sizes="(max-width: 720px) 160px, 224px"
