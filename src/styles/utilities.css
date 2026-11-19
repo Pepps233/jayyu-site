@@ -106,7 +106,8 @@
   align-self: start;
   display: grid;
   gap: 8px;
-  max-width: min(480px, 100%);
+  width: min(480px, 100%);
+  container-type: inline-size;
   margin-top: clamp(16px, 3vh, 34px);
   font-size: clamp(0.82rem, 1.1vw, 0.94rem);
   line-height: 1.25;
@@ -122,6 +123,11 @@
 
 .landing-currently a {
   text-decoration: none;
+}
+
+.landing-currently__single-line {
+  white-space: nowrap;
+  font-size: min(1em, 3.2cqi);
 }
 
 .landing-links--social {
@@ -1272,7 +1278,6 @@
     grid-row: 3;
     justify-self: start;
     align-self: start;
-    max-width: min(310px, 100%);
     margin-top: 0;
     text-align: left;
   }

@@ -16,8 +16,8 @@ const socialLinks = [
 ];
 
 const currentlyItems = [
-  { label: 'working on', text: 'Large Scale Codebase Rewrites Using Agent Swarms' },
-  { label: 'cool reads', text: 'Demystifying Agent Skills', href: 'https://arxiv.org/pdf/2608.14036', external: true },
+  { label: 'working on', text: 'Large Scale Codebase Rewrites Using Agent Swarms', singleLine: true },
+  { label: 'cool reads', text: 'Context Language Models', href: 'https://arxiv.org/abs/2609.37725', external: true },
   { label: 'last book', text: '我与地坛, 史铁生', href: '/blog/' },
   { label: 'latest writing', text: '论《矛盾论》', href: '/blog/on-contradiction/?lang=zh' },
 ];
@@ -62,7 +62,7 @@ const currentlyItems = [
     </nav>
     <div class="landing-currently" aria-label="Current notes">
       {currentlyItems.map((item, index) => (
-        <p style={`--landing-item-index: ${index};`}>
+        <p class:list={{ 'landing-currently__single-line': item.singleLine }} style={`--landing-item-index: ${index};`}>
           <span>[{item.label}]:</span>
           {item.href ? (
             <a
