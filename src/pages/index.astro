@@ -16,9 +16,10 @@ const socialLinks = [
 ];
 
 const currentlyItems = [
-  { label: 'working on', text: 'diffex ai', href: 'https://diffex.ai/', external: true },
+  { label: 'working on', text: 'Large Scale Codebase Rewrites Using Agent Swarms' },
   { label: 'cool reads', text: 'Demystifying Agent Skills', href: 'https://arxiv.org/pdf/2608.14036', external: true },
   { label: 'last book', text: '我与地坛, 史铁生', href: '/blog/' },
+  { label: 'latest writing', text: '论《矛盾论》', href: '/blog/on-contradiction/?lang=zh' },
 ];
 ---
 
@@ -63,13 +64,15 @@ const currentlyItems = [
       {currentlyItems.map((item, index) => (
         <p style={`--landing-item-index: ${index};`}>
           <span>[{item.label}]:</span>
-          <a
-            href={item.href}
-            target={item.external ? '_blank' : undefined}
-            rel={item.external ? 'noopener noreferrer' : undefined}
-          >
-            {item.text}
-          </a>
+          {item.href ? (
+            <a
+              href={item.href}
+              target={item.external ? '_blank' : undefined}
+              rel={item.external ? 'noopener noreferrer' : undefined}
+            >
+              {item.text}
+            </a>
+          ) : item.text}
         </p>
       ))}
     </div>

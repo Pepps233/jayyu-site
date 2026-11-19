@@ -106,7 +106,7 @@
   align-self: start;
   display: grid;
   gap: 8px;
-  max-width: min(430px, 100%);
+  max-width: min(480px, 100%);
   margin-top: clamp(16px, 3vh, 34px);
   font-size: clamp(0.82rem, 1.1vw, 0.94rem);
   line-height: 1.25;
@@ -115,6 +115,7 @@
 
 .landing-currently p {
   margin: 0;
+  text-wrap: pretty;
   animation: landing-text-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(620ms + (var(--landing-item-index, 0) * 70ms));
 }
