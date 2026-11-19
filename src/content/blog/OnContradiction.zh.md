@@ -16,7 +16,7 @@ translationKey: 'on-contradiction'
 
 ![一位读者坐在蜿蜒山路旁，身边是冷色墨山与暖色山坡交汇的风景。](../../assets/images/on-contradiction-hero.png)
 
-<figcaption>一位读者坐在山间明暗交汇处，思索矛盾。</figcaption>
+<figcaption>山路上的光影。</figcaption>
 </figure>
 
 当我们观察一件事物，并且想去了解它时，我们该怎样开始呢？

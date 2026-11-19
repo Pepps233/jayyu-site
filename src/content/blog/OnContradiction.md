@@ -17,7 +17,7 @@ translationKey: 'on-contradiction'
 
 ![A reader beside a winding mountain path where cool ink mountains meet sunlit ochre slopes.](../../assets/images/on-contradiction-hero.png)
 
-<figcaption>A reader between shadow and sunlight, reflecting on contradiction.</figcaption>
+<figcaption>Light and shadow across a mountain path.</figcaption>
 </figure>
 
 When we observe something and want to understand it, where should we begin?
